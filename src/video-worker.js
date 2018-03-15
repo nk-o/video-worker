@@ -1,3 +1,4 @@
+import global from 'global';
 
 // Deferred
 // thanks http://stackoverflow.com/questions/18096715/implement-deferred-object-without-using-jquery
@@ -242,35 +243,14 @@ export default class VideoWorker {
 
         if (self.type === 'youtube' && self.player.mute) {
             self.player.mute();
-
-            // yt mute
-            // if (self.options.mute) {
-            //     e.target.mute();
-            // } else if (self.options.volume) {
-            //     e.target.setVolume(self.options.volume);
-            // }
         }
 
         if (self.type === 'vimeo' && self.player.setVolume) {
             self.player.setVolume(0);
-
-            // vim mute
-            // if (self.options.mute) {
-            //     self.player.setVolume(0);
-            // } else if (self.options.volume) {
-            //     self.player.setVolume(self.options.volume);
-            // }
         }
 
         if (self.type === 'local') {
             self.$iframe.muted = true;
-
-            // local mute
-            // if (self.options.mute) {
-            //     self.$iframe.muted = true;
-            // } else if (self.$iframe.volume) {
-            //     self.$iframe.volume = self.options.volume / 100;
-            // }
         }
     }
 
@@ -281,7 +261,7 @@ export default class VideoWorker {
         }
 
         if (self.type === 'youtube' && self.player.mute) {
-            self.player.unmute();
+            self.player.unMute();
         }
 
         if (self.type === 'vimeo' && self.player.setVolume) {
@@ -309,6 +289,50 @@ export default class VideoWorker {
 
         if (self.type === 'local') {
             self.$iframe.volume = volume / 100;
+        }
+    }
+
+    getVolume(callback) {
+        const self = this;
+        if (!self.player) {
+            callback(false);
+            return;
+        }
+
+        if (self.type === 'youtube' && self.player.getVolume) {
+            callback(self.player.getVolume());
+        }
+
+        if (self.type === 'vimeo' && self.player.getVolume) {
+            self.player.getVolume().then((volume) => {
+                callback(volume);
+            });
+        }
+
+        if (self.type === 'local') {
+            callback(self.$iframe.volume * 100);
+        }
+    }
+
+    getMuted(callback) {
+        const self = this;
+        if (!self.player) {
+            callback(null);
+            return;
+        }
+
+        if (self.type === 'youtube' && self.player.isMuted) {
+            callback(self.player.isMuted());
+        }
+
+        if (self.type === 'vimeo' && self.player.getVolume) {
+            self.player.getVolume().then((volume) => {
+                callback(!!volume);
+            });
+        }
+
+        if (self.type === 'local') {
+            callback(self.$iframe.muted);
         }
     }
 
@@ -420,6 +444,17 @@ export default class VideoWorker {
                             self.play(self.options.startTime);
                         }
                         self.fire('ready', e);
+
+                        // volumechange
+                        setInterval(() => {
+                            self.getVolume((volume) => {
+                                if (self.options.volume !== volume) {
+                                    self.options.volume = volume;
+                                    self.fire('volumechange', e);
+                                    console.log('volumechange');
+                                }
+                            });
+                        }, 150);
                     },
                     onStateChange(e) {
                         // loop
@@ -437,24 +472,25 @@ export default class VideoWorker {
                             self.fire('pause', e);
                         }
                         if (e.data === YT.PlayerState.ENDED) {
-                            self.fire('end', e);
+                            self.fire('ended', e);
                         }
 
-                        // check for end of video and play again or stop
-                        if (self.options.endTime) {
-                            if (e.data === YT.PlayerState.PLAYING) {
-                                ytProgressInterval = setInterval(() => {
-                                    if (self.options.endTime && self.player.getCurrentTime() >= self.options.endTime) {
-                                        if (self.options.loop) {
-                                            self.play(self.options.startTime);
-                                        } else {
-                                            self.pause();
-                                        }
+                        // progress check
+                        if (e.data === YT.PlayerState.PLAYING) {
+                            ytProgressInterval = setInterval(() => {
+                                self.fire('timeupdate', e);
+
+                                // check for end of video and play again or stop
+                                if (self.options.endTime && self.player.getCurrentTime() >= self.options.endTime) {
+                                    if (self.options.loop) {
+                                        self.play(self.options.startTime);
+                                    } else {
+                                        self.pause();
                                     }
-                                }, 150);
-                            } else {
-                                clearInterval(ytProgressInterval);
-                            }
+                                }
+                            }, 150);
+                        } else {
+                            clearInterval(ytProgressInterval);
                         }
                     },
                 };
@@ -530,8 +566,10 @@ export default class VideoWorker {
                 self.player.on('timeupdate', (e) => {
                     if (!vmStarted) {
                         self.fire('started', e);
+                        vmStarted = 1;
                     }
-                    vmStarted = 1;
+
+                    self.fire('timeupdate', e);
 
                     // check for end of video and play again or stop
                     if (self.options.endTime) {
@@ -556,10 +594,13 @@ export default class VideoWorker {
                     self.fire('pause', e);
                 });
                 self.player.on('ended', (e) => {
-                    self.fire('end', e);
+                    self.fire('ended', e);
                 });
                 self.player.on('loaded', (e) => {
                     self.fire('ready', e);
+                });
+                self.player.on('volumechange', (e) => {
+                    self.fire('volumechange', e);
                 });
             }
 
@@ -608,7 +649,9 @@ export default class VideoWorker {
                     }
                     locStarted = 1;
                 });
-                self.player.addEventListener('timeupdate', function () {
+                self.player.addEventListener('timeupdate', function (e) {
+                    self.fire('timeupdate', e);
+
                     // check for end of video and play again or stop
                     if (self.options.endTime) {
                         if (self.options.endTime && this.currentTime >= self.options.endTime) {
@@ -627,7 +670,7 @@ export default class VideoWorker {
                     self.fire('pause', e);
                 });
                 self.player.addEventListener('ended', (e) => {
-                    self.fire('end', e);
+                    self.fire('ended', e);
                 });
                 self.player.addEventListener('loadedmetadata', function () {
                     // get video width and height
@@ -640,6 +683,12 @@ export default class VideoWorker {
                     if (self.options.autoplay) {
                         self.play(self.options.startTime);
                     }
+                });
+                self.player.addEventListener('volumechange', (e) => {
+                    self.getVolume((volume) => {
+                        self.options.volume = volume;
+                    });
+                    self.fire('volumechange', e);
                 });
             }
 
@@ -741,3 +790,4 @@ export default class VideoWorker {
     }
 }
 
+global.VideoWorker = VideoWorker;

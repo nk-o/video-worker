@@ -36,10 +36,6 @@ gulp.task('js', () => {
         .pipe($.plumber({ errorHandler }))
         .pipe(named())
         .pipe(webpack({
-            output: {
-                library: 'VideoWorker',
-                libraryTarget: 'var'
-            },
             module: {
                 loaders: [
                     {

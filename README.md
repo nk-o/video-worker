@@ -64,10 +64,12 @@ new VideoWorker('<URL_TO_YOUR_VIDEO>', {
 Name | Parameters | Description
 :--- | :----- | :----------
 ready | `event` | Fires only once, when the video is ready to play.
+volumechange | `event` | Fires when video volume changed.
+timeupdate | `event` | Fires when video current time changed.
 started | `event` | Fires only once, when the video is started playing.
 play | `event` | Fires on video play start.
 pause | `event` | Fires on video paused.
-end | `event` | Fires on video ended.
+ended | `event` | Fires on video ended.
 
 ### Example
 ```javascript
@@ -85,9 +87,11 @@ play | - | Play video.
 pause | - | Pause video.
 mute | - | Mute sound.
 unmute | - | Unmute sound.
+getMuted | int | Get mute state. `videoObject.getMuted((muted) => { ... })`
 setVolume | - | Set volume level (takes integer value from 0 to 100). `videoObject.setVolume(40);`
-getImageURL | - | Retrieves Youtube/Vimeo video poster image URL. `videoObject.getImageURL((url) => { ... })`
-getIframe | - | Retrieves iframe/video tag. `videoObject.getIframe((iframe) => { ... })`
+getVolume | int | Get volume level. `videoObject.getVolume((volume) => { ... })`
+getImageURL | string | Retrieves Youtube/Vimeo video poster image URL. `videoObject.getImageURL((url) => { ... })`
+getIframe | dom | Retrieves iframe/video tag. `videoObject.getIframe((iframe) => { ... })`
 
 ### Example
 ```javascript
