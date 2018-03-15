@@ -1,6 +1,6 @@
 /*!
  * Name    : Video Worker
- * Version : 1.0.0
+ * Version : 1.0.1
  * Author  : nK <https://nkdev.info>
  * GitHub  : https://github.com/nk-o/video-worker
  */
@@ -121,11 +121,6 @@ Deferred.prototype = {
         this._fail.push(callback);
     }
 };
-
-// init events
-function addEventListener(el, eventName, handler) {
-    el.addEventListener(eventName, handler);
-}
 
 var ID = 0;
 var YoutubeAPIadded = 0;
@@ -727,13 +722,13 @@ var VideoWorker = function () {
                     self.player = self.player || self.$iframe;
 
                     var locStarted = void 0;
-                    addEventListener(self.player, 'playing', function (e) {
+                    self.player.addEventListener('playing', function (e) {
                         if (!locStarted) {
                             self.fire('started', e);
                         }
                         locStarted = 1;
                     });
-                    addEventListener(self.player, 'timeupdate', function () {
+                    self.player.addEventListener('timeupdate', function () {
                         // check for end of video and play again or stop
                         if (self.options.endTime) {
                             if (self.options.endTime && this.currentTime >= self.options.endTime) {
@@ -745,16 +740,16 @@ var VideoWorker = function () {
                             }
                         }
                     });
-                    addEventListener(self.player, 'play', function (e) {
+                    self.player.addEventListener('play', function (e) {
                         self.fire('play', e);
                     });
-                    addEventListener(self.player, 'pause', function (e) {
+                    self.player.addEventListener('pause', function (e) {
                         self.fire('pause', e);
                     });
-                    addEventListener(self.player, 'ended', function (e) {
+                    self.player.addEventListener('ended', function (e) {
                         self.fire('end', e);
                     });
-                    addEventListener(self.player, 'loadedmetadata', function () {
+                    self.player.addEventListener('loadedmetadata', function () {
                         // get video width and height
                         self.videoWidth = this.videoWidth || 1280;
                         self.videoHeight = this.videoHeight || 720;
