@@ -27,11 +27,6 @@ Deferred.prototype = {
     },
 };
 
-// init events
-function addEventListener(el, eventName, handler) {
-    el.addEventListener(eventName, handler);
-}
-
 let ID = 0;
 let YoutubeAPIadded = 0;
 let VimeoAPIadded = 0;
@@ -607,13 +602,13 @@ export default class VideoWorker {
                 self.player = self.player || self.$iframe;
 
                 let locStarted;
-                addEventListener(self.player, 'playing', (e) => {
+                self.player.addEventListener('playing', (e) => {
                     if (!locStarted) {
                         self.fire('started', e);
                     }
                     locStarted = 1;
                 });
-                addEventListener(self.player, 'timeupdate', function () {
+                self.player.addEventListener('timeupdate', function () {
                     // check for end of video and play again or stop
                     if (self.options.endTime) {
                         if (self.options.endTime && this.currentTime >= self.options.endTime) {
@@ -625,16 +620,16 @@ export default class VideoWorker {
                         }
                     }
                 });
-                addEventListener(self.player, 'play', (e) => {
+                self.player.addEventListener('play', (e) => {
                     self.fire('play', e);
                 });
-                addEventListener(self.player, 'pause', (e) => {
+                self.player.addEventListener('pause', (e) => {
                     self.fire('pause', e);
                 });
-                addEventListener(self.player, 'ended', (e) => {
+                self.player.addEventListener('ended', (e) => {
                     self.fire('end', e);
                 });
-                addEventListener(self.player, 'loadedmetadata', function () {
+                self.player.addEventListener('loadedmetadata', function () {
                     // get video width and height
                     self.videoWidth = this.videoWidth || 1280;
                     self.videoHeight = this.videoHeight || 720;
