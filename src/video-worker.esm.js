@@ -248,7 +248,7 @@ export default class VideoWorker {
         }
 
         if (self.type === 'local') {
-            self.$iframe.muted = true;
+            self.$video.muted = true;
         }
     }
 
@@ -267,7 +267,7 @@ export default class VideoWorker {
         }
 
         if (self.type === 'local') {
-            self.$iframe.muted = false;
+            self.$video.muted = false;
         }
     }
 
@@ -286,7 +286,7 @@ export default class VideoWorker {
         }
 
         if (self.type === 'local') {
-            self.$iframe.volume = volume / 100;
+            self.$video.volume = volume / 100;
         }
     }
 
@@ -308,7 +308,7 @@ export default class VideoWorker {
         }
 
         if (self.type === 'local') {
-            callback(self.$iframe.volume * 100);
+            callback(self.$video.volume * 100);
         }
     }
 
@@ -330,7 +330,7 @@ export default class VideoWorker {
         }
 
         if (self.type === 'local') {
-            callback(self.$iframe.muted);
+            callback(self.$video.muted);
         }
     }
 
@@ -387,19 +387,19 @@ export default class VideoWorker {
         }
     }
 
-    getIframe(callback) {
+    getVideo(callback) {
         const self = this;
 
-        // return generated iframe
-        if (self.$iframe) {
-            callback(self.$iframe);
+        // return generated video block
+        if (self.$video) {
+            callback(self.$video);
             return;
         }
 
-        // generate new iframe
+        // generate new video block
         self.onAPIready(() => {
             let hiddenDiv;
-            if (!self.$iframe) {
+            if (!self.$video) {
                 hiddenDiv = document.createElement('div');
                 hiddenDiv.style.display = 'none';
             }
@@ -492,7 +492,7 @@ export default class VideoWorker {
                     },
                 };
 
-                const firstInit = !self.$iframe;
+                const firstInit = !self.$video;
                 if (firstInit) {
                     const div = document.createElement('div');
                     div.setAttribute('id', self.playerID);
@@ -501,11 +501,11 @@ export default class VideoWorker {
                 }
                 self.player = self.player || new window.YT.Player(self.playerID, self.playerOptions);
                 if (firstInit) {
-                    self.$iframe = document.getElementById(self.playerID);
+                    self.$video = document.getElementById(self.playerID);
 
                     // get video width and height
-                    self.videoWidth = parseInt(self.$iframe.getAttribute('width'), 10) || 1280;
-                    self.videoHeight = parseInt(self.$iframe.getAttribute('height'), 10) || 720;
+                    self.videoWidth = parseInt(self.$video.getAttribute('width'), 10) || 1280;
+                    self.videoHeight = parseInt(self.$video.getAttribute('height'), 10) || 720;
                 }
             }
 
@@ -528,16 +528,16 @@ export default class VideoWorker {
                 // loop
                 self.playerOptions += `&loop=${self.options.loop ? 1 : 0}`;
 
-                if (!self.$iframe) {
-                    self.$iframe = document.createElement('iframe');
-                    self.$iframe.setAttribute('id', self.playerID);
-                    self.$iframe.setAttribute('src', `https://player.vimeo.com/video/${self.videoID}?${self.playerOptions}`);
-                    self.$iframe.setAttribute('frameborder', '0');
-                    hiddenDiv.appendChild(self.$iframe);
+                if (!self.$video) {
+                    self.$video = document.createElement('iframe');
+                    self.$video.setAttribute('id', self.playerID);
+                    self.$video.setAttribute('src', `https://player.vimeo.com/video/${self.videoID}?${self.playerOptions}`);
+                    self.$video.setAttribute('frameborder', '0');
+                    hiddenDiv.appendChild(self.$video);
                     document.body.appendChild(hiddenDiv);
                 }
 
-                self.player = self.player || new Vimeo.Player(self.$iframe);
+                self.player = self.player || new Vimeo.Player(self.$video);
 
                 // get video width and height
                 self.player.getVideoWidth().then((width) => {
@@ -609,35 +609,35 @@ export default class VideoWorker {
                 element.appendChild(source);
             }
             if (self.type === 'local') {
-                if (!self.$iframe) {
-                    self.$iframe = document.createElement('video');
+                if (!self.$video) {
+                    self.$video = document.createElement('video');
 
                     // mute
                     if (self.options.mute) {
-                        self.$iframe.muted = true;
-                    } else if (self.$iframe.volume) {
-                        self.$iframe.volume = self.options.volume / 100;
+                        self.$video.muted = true;
+                    } else if (self.$video.volume) {
+                        self.$video.volume = self.options.volume / 100;
                     }
 
                     // loop
                     if (self.options.loop) {
-                        self.$iframe.loop = true;
+                        self.$video.loop = true;
                     }
 
                     // autoplay enable on mobile devices
-                    self.$iframe.setAttribute('playsinline', '');
-                    self.$iframe.setAttribute('webkit-playsinline', '');
+                    self.$video.setAttribute('playsinline', '');
+                    self.$video.setAttribute('webkit-playsinline', '');
 
-                    self.$iframe.setAttribute('id', self.playerID);
-                    hiddenDiv.appendChild(self.$iframe);
+                    self.$video.setAttribute('id', self.playerID);
+                    hiddenDiv.appendChild(self.$video);
                     document.body.appendChild(hiddenDiv);
 
                     Object.keys(self.videoID).forEach((key) => {
-                        addSourceToLocal(self.$iframe, self.videoID[key], `video/${key}`);
+                        addSourceToLocal(self.$video, self.videoID[key], `video/${key}`);
                     });
                 }
 
-                self.player = self.player || self.$iframe;
+                self.player = self.player || self.$video;
 
                 let locStarted;
                 self.player.addEventListener('playing', (e) => {
@@ -689,7 +689,7 @@ export default class VideoWorker {
                 });
             }
 
-            callback(self.$iframe);
+            callback(self.$video);
         });
     }
 

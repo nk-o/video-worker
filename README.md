@@ -19,14 +19,14 @@ import VideoWorker from 'video-worker';
 const videoObject = new VideoWorker('https://www.youtube.com/watch?v=ab0TSkLe-E0');
 
 if (videoObject.isValid()) {
-    // retrieve iframe/video tag.
-    videoObject.getIframe((iframe) => {
-        const $parent = iframe.parentNode;
+    // retrieve iframe/video dom element.
+    videoObject.getVideo((video) => {
+        const $parent = video.parentNode;
         
         // insert video in the body.
-        document.body.appendChild(iframe);
+        document.body.appendChild(video);
 
-        // remove temporary parent iframe element (created by VideoWorker).
+        // remove temporary parent video element (created by VideoWorker).
         $parent.parentNode.removeChild($parent);
     });
 }
@@ -91,7 +91,7 @@ getMuted | int | Get mute state. `videoObject.getMuted((muted) => { ... })`
 setVolume | - | Set volume level (takes integer value from 0 to 100). `videoObject.setVolume(40);`
 getVolume | int | Get volume level. `videoObject.getVolume((volume) => { ... })`
 getImageURL | string | Retrieves Youtube/Vimeo video poster image URL. `videoObject.getImageURL((url) => { ... })`
-getIframe | dom | Retrieves iframe/video tag. `videoObject.getIframe((iframe) => { ... })`
+getVideo | dom | Retrieves iframe/video dom element. `videoObject.getVideo((video) => { ... })`
 
 ### Example
 ```javascript
