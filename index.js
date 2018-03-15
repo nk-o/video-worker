@@ -1,1 +1,1 @@
-module.exports = require('./src/video-worker');
+module.exports = require('./src/video-worker.esm');
