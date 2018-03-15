@@ -1,0 +1,107 @@
+## Video Worker
+API wrapper for Youtube, Vimeo and Local videos
+
+## Getting Started
+
+### HTML
+```html
+<!-- Video Worker -->
+<script src="video-worker/dist/video-worker.min.js"></script>
+```
+
+### Or use NPM
+npm: `npm install video-worker --save`
+
+### Simple Example
+```javascript
+import VideoWorker from 'video-worker';
+
+const videoObject = new VideoWorker('https://www.youtube.com/watch?v=ab0TSkLe-E0');
+
+if (videoObject.isValid()) {
+    // retrieve iframe/video tag.
+    videoObject.getIframe((iframe) => {
+        const $parent = iframe.parentNode;
+        
+        // insert video in the body.
+        document.body.appendChild(iframe);
+
+        // remove temporary parent iframe element (created by VideoWorker).
+        $parent.parentNode.removeChild($parent);
+    });
+}
+```
+
+Video URLs examples:
+* YouTube `https://www.youtube.com/watch?v=ab0TSkLe-E0`
+* Vimeo `https://vimeo.com/110138539`
+* Local Hosted `mp4:./local-video.mp4,webm:./local-video.webm,ogv:./local-video.ogv`
+
+Note: for local hosted videos required only 1 video type, not necessary use all mp4, webm and ogv. This need only for maximum compatibility with all browsers.
+
+## Options
+Name | Type | Default | Description
+:--- | :--- | :------ | :----------
+autoplay | bool | `false` | Video autoplay.
+loop | bool | `false` | Video playing loop.
+showContols | bool | `true` | Video controls.
+mute | bool | `false` | Mute sound.
+volume | int | `100` | Volume level from 0 to 100.
+startTime | float | `0` | Start time in seconds when video will be started (this value will be applied also after loop).
+endTime | float | `0` | End time in seconds when video will be ended.
+
+### Example
+```javascript
+new VideoWorker('<URL_TO_YOUR_VIDEO>', {
+    autoplay: true,
+    loop: true,
+    startTime: 10,
+});
+```
+
+
+## Events
+Name | Parameters | Description
+:--- | :----- | :----------
+ready | `event` | Fires only once, when the video is ready to play.
+started | `event` | Fires only once, when the video is started playing.
+play | `event` | Fires on video play start.
+pause | `event` | Fires on video paused.
+end | `event` | Fires on video ended.
+
+### Example
+```javascript
+videoObject.on('ready', (event) => {
+    console.log('video ready', event);
+});
+```
+
+
+## Methods
+Name | Result | Description
+:--- | :----- | :----------
+isValid | bool | Check if the video is successfully determined and ready to use.
+play | - | Play video.
+pause | - | Pause video.
+mute | - | Mute sound.
+unmute | - | Unmute sound.
+setVolume | - | Set volume level (takes integer value from 0 to 100). `videoObject.setVolume(40);`
+getImageURL | - | Retrieves Youtube/Vimeo video poster image URL. `videoObject.getImageURL((url) => { ... })`
+getIframe | - | Retrieves iframe/video tag. `videoObject.getIframe((iframe) => { ... })`
+
+### Example
+```javascript
+videoObject.mute();
+```
+
+## For Developers
+
+### Installation
+* Run `npm install` in the command line. Or if you need to update some dependencies, run `npm update`
+
+### Building
+* `npm run build` to run build
+
+### Linting
+* `npm run js-lint` to show eslint errors
+* `npm run js-lint-fix` to automatically fix some of the eslint errors
