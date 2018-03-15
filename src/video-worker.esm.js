@@ -449,7 +449,6 @@ export default class VideoWorker {
                                 if (self.options.volume !== volume) {
                                     self.options.volume = volume;
                                     self.fire('volumechange', e);
-                                    console.log('volumechange');
                                 }
                             });
                         }, 150);
