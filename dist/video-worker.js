@@ -1,6 +1,6 @@
 /*!
  * Name    : Video Worker
- * Version : 1.1.0
+ * Version : 1.1.1
  * Author  : nK <https://nkdev.info>
  * GitHub  : https://github.com/nk-o/video-worker
  */
@@ -577,6 +577,14 @@ var VideoWorker = function () {
                 request.send();
                 request = null;
             }
+        }
+
+        // fallback to the old version.
+
+    }, {
+        key: 'getIframe',
+        value: function getIframe(callback) {
+            this.getVideo(callback);
         }
     }, {
         key: 'getVideo',
