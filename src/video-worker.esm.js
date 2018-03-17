@@ -387,6 +387,11 @@ export default class VideoWorker {
         }
     }
 
+    // fallback to the old version.
+    getIframe(callback) {
+        this.getVideo(callback);
+    }
+
     getVideo(callback) {
         const self = this;
 
