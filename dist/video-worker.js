@@ -1,6 +1,6 @@
 /*!
  * Name    : Video Worker
- * Version : 1.1.1
+ * Version : 1.1.2
  * Author  : nK <https://nkdev.info>
  * GitHub  : https://github.com/nk-o/video-worker
  */
@@ -812,6 +812,11 @@ var VideoWorker = function () {
                 if (self.type === 'local') {
                     if (!self.$video) {
                         self.$video = document.createElement('video');
+
+                        // show controls
+                        if (self.options.showContols) {
+                            self.$video.controls = true;
+                        }
 
                         // mute
                         if (self.options.mute) {
