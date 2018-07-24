@@ -617,6 +617,11 @@ export default class VideoWorker {
                 if (!self.$video) {
                     self.$video = document.createElement('video');
 
+                    // show controls
+                    if (self.options.showContols) {
+                        self.$video.controls = true;
+                    }
+
                     // mute
                     if (self.options.mute) {
                         self.$video.muted = true;
