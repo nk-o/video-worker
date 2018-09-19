@@ -1,6 +1,6 @@
 /*!
  * Name    : Video Worker
- * Version : 1.1.4
+ * Version : 1.1.5
  * Author  : nK <https://nkdev.info>
  * GitHub  : https://github.com/nk-o/video-worker
  */
@@ -708,8 +708,6 @@ var VideoWorker = function () {
                         self.videoWidth = parseInt(self.$video.getAttribute('width'), 10) || 1280;
                         self.videoHeight = parseInt(self.$video.getAttribute('height'), 10) || 720;
                     }
-
-                    callback(self.$video);
                 }
 
                 // Vimeo
@@ -720,7 +718,7 @@ var VideoWorker = function () {
                         transparent: 0,
                         autoplay: self.options.autoplay ? 1 : 0,
                         loop: self.options.loop ? 1 : 0,
-                        muted: self.options.mute || self.options.volume === 0 ? 1 : 0
+                        muted: self.options.mute ? 1 : 0
                     };
 
                     if (self.options.volume) {
@@ -736,16 +734,42 @@ var VideoWorker = function () {
                     }
 
                     if (!self.$video) {
-                        hiddenDiv.setAttribute('id', self.playerID + '-wrap');
+                        var playerOptionsString = '';
+                        Object.keys(self.playerOptions).forEach(function (key) {
+                            if (playerOptionsString !== '') {
+                                playerOptionsString += '&';
+                            }
+                            playerOptionsString += key + '=' + encodeURIComponent(self.playerOptions[key]);
+                        });
+
+                        // we need to create iframe manually because when we create it using API
+                        // js events won't triggers after iframe moved to another place
+                        self.$video = document.createElement('iframe');
+                        self.$video.setAttribute('id', self.playerID);
+                        self.$video.setAttribute('src', 'https://player.vimeo.com/video/' + self.videoID + '?' + playerOptionsString);
+                        self.$video.setAttribute('frameborder', '0');
+                        self.$video.setAttribute('mozallowfullscreen', '');
+                        self.$video.setAttribute('allowfullscreen', '');
+
+                        hiddenDiv.appendChild(self.$video);
                         document.body.appendChild(hiddenDiv);
                     }
-                    self.player = self.player || new Vimeo.Player(self.playerID + '-wrap', self.playerOptions);
+                    self.player = self.player || new Vimeo.Player(self.$video, self.playerOptions);
 
                     // set current time for autoplay
                     if (self.options.startTime && self.options.autoplay) {
                         self.player.setCurrentTime(self.options.startTime);
                     }
 
+                    // get video width and height
+                    self.player.getVideoWidth().then(function (width) {
+                        self.videoWidth = width || 1280;
+                    });
+                    self.player.getVideoHeight().then(function (height) {
+                        self.videoHeight = height || 720;
+                    });
+
+                    // events
                     var vmStarted = void 0;
                     self.player.on('timeupdate', function (e) {
                         if (!vmStarted) {
@@ -785,19 +809,6 @@ var VideoWorker = function () {
                     });
                     self.player.on('volumechange', function (e) {
                         self.fire('volumechange', e);
-                    });
-
-                    self.player.ready().then(function () {
-                        self.$video = document.querySelector('#' + self.playerID + '-wrap > iframe');
-                        self.$video.setAttribute('id', self.playerID);
-
-                        // get video width and height
-                        self.videoWidth = parseInt(self.$video.getAttribute('width'), 10) || 1280;
-                        self.videoHeight = parseInt(self.$video.getAttribute('height'), 10) || 720;
-
-                        callback(self.$video);
-                    }).catch(function (error) {
-                        console.log(error);
                     });
                 }
 
@@ -892,9 +903,8 @@ var VideoWorker = function () {
                         });
                         self.fire('volumechange', e);
                     });
-
-                    callback(self.$video);
                 }
+                callback(self.$video);
             });
         }
     }, {
