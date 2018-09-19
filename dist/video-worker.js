@@ -1,6 +1,6 @@
 /*!
  * Name    : Video Worker
- * Version : 1.1.3
+ * Version : 1.1.4
  * Author  : nK <https://nkdev.info>
  * GitHub  : https://github.com/nk-o/video-worker
  */
@@ -736,12 +736,10 @@ var VideoWorker = function () {
                     }
 
                     if (!self.$video) {
-                        var _div = document.createElement('div');
-                        _div.setAttribute('id', self.playerID);
-                        hiddenDiv.appendChild(_div);
+                        hiddenDiv.setAttribute('id', self.playerID + '-wrap');
                         document.body.appendChild(hiddenDiv);
                     }
-                    self.player = self.player || new Vimeo.Player(self.playerID, self.playerOptions);
+                    self.player = self.player || new Vimeo.Player(self.playerID + '-wrap', self.playerOptions);
 
                     // set current time for autoplay
                     if (self.options.startTime && self.options.autoplay) {
@@ -790,7 +788,8 @@ var VideoWorker = function () {
                     });
 
                     self.player.ready().then(function () {
-                        self.$video = document.querySelector('#' + self.playerID + ' > iframe');
+                        self.$video = document.querySelector('#' + self.playerID + '-wrap > iframe');
+                        self.$video.setAttribute('id', self.playerID);
 
                         // get video width and height
                         self.videoWidth = parseInt(self.$video.getAttribute('width'), 10) || 1280;
