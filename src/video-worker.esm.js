@@ -512,8 +512,6 @@ export default class VideoWorker {
                     self.videoWidth = parseInt(self.$video.getAttribute('width'), 10) || 1280;
                     self.videoHeight = parseInt(self.$video.getAttribute('height'), 10) || 720;
                 }
-
-                callback(self.$video);
             }
 
             // Vimeo
@@ -524,7 +522,7 @@ export default class VideoWorker {
                     transparent: 0,
                     autoplay: self.options.autoplay ? 1 : 0,
                     loop: self.options.loop ? 1 : 0,
-                    muted: self.options.mute || self.options.volume === 0 ? 1 : 0,
+                    muted: self.options.mute ? 1 : 0,
                 };
 
                 if (self.options.volume) {
@@ -541,16 +539,42 @@ export default class VideoWorker {
 
 
                 if (!self.$video) {
-                    hiddenDiv.setAttribute('id', `${self.playerID}-wrap`);
+                    let playerOptionsString = '';
+                    Object.keys(self.playerOptions).forEach((key) => {
+                        if (playerOptionsString !== '') {
+                            playerOptionsString += '&';
+                        }
+                        playerOptionsString += `${key}=${encodeURIComponent(self.playerOptions[key])}`;
+                    });
+
+                    // we need to create iframe manually because when we create it using API
+                    // js events won't triggers after iframe moved to another place
+                    self.$video = document.createElement('iframe');
+                    self.$video.setAttribute('id', self.playerID);
+                    self.$video.setAttribute('src', `https://player.vimeo.com/video/${self.videoID}?${playerOptionsString}`);
+                    self.$video.setAttribute('frameborder', '0');
+                    self.$video.setAttribute('mozallowfullscreen', '');
+                    self.$video.setAttribute('allowfullscreen', '');
+
+                    hiddenDiv.appendChild(self.$video);
                     document.body.appendChild(hiddenDiv);
                 }
-                self.player = self.player || new Vimeo.Player(`${self.playerID}-wrap`, self.playerOptions);
+                self.player = self.player || new Vimeo.Player(self.$video, self.playerOptions);
 
                 // set current time for autoplay
                 if (self.options.startTime && self.options.autoplay) {
                     self.player.setCurrentTime(self.options.startTime);
                 }
 
+                // get video width and height
+                self.player.getVideoWidth().then((width) => {
+                    self.videoWidth = width || 1280;
+                });
+                self.player.getVideoHeight().then((height) => {
+                    self.videoHeight = height || 720;
+                });
+
+                // events
                 let vmStarted;
                 self.player.on('timeupdate', (e) => {
                     if (!vmStarted) {
@@ -591,20 +615,6 @@ export default class VideoWorker {
                 self.player.on('volumechange', (e) => {
                     self.fire('volumechange', e);
                 });
-
-                self.player.ready().then(() => {
-                    self.$video = document.querySelector(`#${self.playerID}-wrap > iframe`);
-                    self.$video.setAttribute('id', self.playerID);
-
-                    // get video width and height
-                    self.videoWidth = parseInt(self.$video.getAttribute('width'), 10) || 1280;
-                    self.videoHeight = parseInt(self.$video.getAttribute('height'), 10) || 720;
-
-                    callback(self.$video);
-                })
-                    .catch((error) => {
-                        console.log(error);
-                    });
             }
 
             // Local
@@ -698,9 +708,8 @@ export default class VideoWorker {
                     });
                     self.fire('volumechange', e);
                 });
-
-                callback(self.$video);
             }
+            callback(self.$video);
         });
     }
 
