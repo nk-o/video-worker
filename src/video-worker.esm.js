@@ -541,12 +541,10 @@ export default class VideoWorker {
 
 
                 if (!self.$video) {
-                    const div = document.createElement('div');
-                    div.setAttribute('id', self.playerID);
-                    hiddenDiv.appendChild(div);
+                    hiddenDiv.setAttribute('id', `${self.playerID}-wrap`);
                     document.body.appendChild(hiddenDiv);
                 }
-                self.player = self.player || new Vimeo.Player(self.playerID, self.playerOptions);
+                self.player = self.player || new Vimeo.Player(`${self.playerID}-wrap`, self.playerOptions);
 
                 // set current time for autoplay
                 if (self.options.startTime && self.options.autoplay) {
@@ -595,7 +593,8 @@ export default class VideoWorker {
                 });
 
                 self.player.ready().then(() => {
-                    self.$video = document.querySelector(`#${self.playerID} > iframe`);
+                    self.$video = document.querySelector(`#${self.playerID}-wrap > iframe`);
+                    self.$video.setAttribute('id', self.playerID);
 
                     // get video width and height
                     self.videoWidth = parseInt(self.$video.getAttribute('width'), 10) || 1280;
