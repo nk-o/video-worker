@@ -1,6 +1,6 @@
 /*!
  * Name    : Video Worker
- * Version : 1.1.2
+ * Version : 1.1.3
  * Author  : nK <https://nkdev.info>
  * GitHub  : https://github.com/nk-o/video-worker
  */
@@ -708,56 +708,44 @@ var VideoWorker = function () {
                         self.videoWidth = parseInt(self.$video.getAttribute('width'), 10) || 1280;
                         self.videoHeight = parseInt(self.$video.getAttribute('height'), 10) || 720;
                     }
+
+                    callback(self.$video);
                 }
 
                 // Vimeo
                 if (self.type === 'vimeo') {
-                    self.playerOptions = '';
+                    self.playerOptions = {
+                        id: self.videoID,
+                        autopause: 0,
+                        transparent: 0,
+                        autoplay: self.options.autoplay ? 1 : 0,
+                        loop: self.options.loop ? 1 : 0,
+                        muted: self.options.mute || self.options.volume === 0 ? 1 : 0
+                    };
 
-                    self.playerOptions += 'player_id=' + self.playerID;
-                    self.playerOptions += '&autopause=0';
-                    self.playerOptions += '&transparent=0';
+                    if (self.options.volume) {
+                        self.playerOptions.volume = self.options.volume;
+                    }
 
                     // hide controls
                     if (!self.options.showContols) {
-                        self.playerOptions += '&badge=0&byline=0&portrait=0&title=0';
+                        self.playerOptions.badge = 0;
+                        self.playerOptions.byline = 0;
+                        self.playerOptions.portrait = 0;
+                        self.playerOptions.title = 0;
                     }
-
-                    // autoplay
-                    self.playerOptions += '&autoplay=' + (self.options.autoplay ? '1' : '0');
-
-                    // loop
-                    self.playerOptions += '&loop=' + (self.options.loop ? 1 : 0);
 
                     if (!self.$video) {
-                        self.$video = document.createElement('iframe');
-                        self.$video.setAttribute('id', self.playerID);
-                        self.$video.setAttribute('src', 'https://player.vimeo.com/video/' + self.videoID + '?' + self.playerOptions);
-                        self.$video.setAttribute('frameborder', '0');
-                        hiddenDiv.appendChild(self.$video);
+                        var _div = document.createElement('div');
+                        _div.setAttribute('id', self.playerID);
+                        hiddenDiv.appendChild(_div);
                         document.body.appendChild(hiddenDiv);
                     }
-
-                    self.player = self.player || new Vimeo.Player(self.$video);
-
-                    // get video width and height
-                    self.player.getVideoWidth().then(function (width) {
-                        self.videoWidth = width || 1280;
-                    });
-                    self.player.getVideoHeight().then(function (height) {
-                        self.videoHeight = height || 720;
-                    });
+                    self.player = self.player || new Vimeo.Player(self.playerID, self.playerOptions);
 
                     // set current time for autoplay
                     if (self.options.startTime && self.options.autoplay) {
                         self.player.setCurrentTime(self.options.startTime);
-                    }
-
-                    // mute
-                    if (self.options.mute) {
-                        self.player.setVolume(0);
-                    } else if (self.options.volume) {
-                        self.player.setVolume(self.options.volume);
                     }
 
                     var vmStarted = void 0;
@@ -799,6 +787,18 @@ var VideoWorker = function () {
                     });
                     self.player.on('volumechange', function (e) {
                         self.fire('volumechange', e);
+                    });
+
+                    self.player.ready().then(function () {
+                        self.$video = document.querySelector('#' + self.playerID + ' > iframe');
+
+                        // get video width and height
+                        self.videoWidth = parseInt(self.$video.getAttribute('width'), 10) || 1280;
+                        self.videoHeight = parseInt(self.$video.getAttribute('height'), 10) || 720;
+
+                        callback(self.$video);
+                    }).catch(function (error) {
+                        console.log(error);
                     });
                 }
 
@@ -893,9 +893,9 @@ var VideoWorker = function () {
                         });
                         self.fire('volumechange', e);
                     });
-                }
 
-                callback(self.$video);
+                    callback(self.$video);
+                }
             });
         }
     }, {
