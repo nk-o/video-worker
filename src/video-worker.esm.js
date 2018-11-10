@@ -483,7 +483,7 @@ export default class VideoWorker {
                                 self.fire('timeupdate', e);
 
                                 // check for end of video and play again or stop
-                                if (self.options.endTime && self.player.getCurrentTime() >= self.options.endTime) {
+                                if ((self.options.endTime && self.player.getCurrentTime() >= self.options.endTime) || self.player.getCurrentTime() + 0.1 >= self.player.getDuration()) {
                                     if (self.options.loop) {
                                         self.play(self.options.startTime);
                                     } else {
