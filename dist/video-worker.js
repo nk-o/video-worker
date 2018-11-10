@@ -1,6 +1,6 @@
 /*!
  * Name    : Video Worker
- * Version : 1.1.5
+ * Version : 1.1.6
  * Author  : nK <https://nkdev.info>
  * GitHub  : https://github.com/nk-o/video-worker
  */
@@ -679,7 +679,7 @@ var VideoWorker = function () {
                                     self.fire('timeupdate', e);
 
                                     // check for end of video and play again or stop
-                                    if (self.options.endTime && self.player.getCurrentTime() >= self.options.endTime) {
+                                    if (self.options.endTime && self.player.getCurrentTime() >= self.options.endTime || self.player.getCurrentTime() + 0.1 >= self.player.getDuration()) {
                                         if (self.options.loop) {
                                             self.play(self.options.startTime);
                                         } else {
