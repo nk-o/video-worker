@@ -644,6 +644,13 @@ var VideoWorker = function () {
                             }
                             self.fire('ready', e);
 
+                            // For seamless loops, set the endTime to 0.1 seconds less than the video's duration
+                            // https://github.com/nk-o/video-worker/issues/2
+                            if (self.options.loop && !self.options.endTime) {
+                                var secondsOffset = 0.1;
+                                self.options.endTime = self.player.getDuration() - secondsOffset;
+                            }
+
                             // volumechange
                             setInterval(function () {
                                 self.getVolume(function (volume) {
@@ -679,7 +686,7 @@ var VideoWorker = function () {
                                     self.fire('timeupdate', e);
 
                                     // check for end of video and play again or stop
-                                    if (self.options.endTime && self.player.getCurrentTime() >= self.options.endTime || self.player.getCurrentTime() + 0.1 >= self.player.getDuration()) {
+                                    if (self.options.endTime && self.player.getCurrentTime() >= self.options.endTime) {
                                         if (self.options.loop) {
                                             self.play(self.options.startTime);
                                         } else {
