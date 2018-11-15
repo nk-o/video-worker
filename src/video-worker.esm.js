@@ -448,6 +448,13 @@ export default class VideoWorker {
                         }
                         self.fire('ready', e);
 
+                        // For seamless loops, set the endTime to 0.1 seconds less than the video's duration
+                        // https://github.com/nk-o/video-worker/issues/2
+                        if (self.options.loop && !self.options.endTime) {
+                            const secondsOffset = 0.1;
+                            self.options.endTime = self.player.getDuration() - secondsOffset;
+                        }
+
                         // volumechange
                         setInterval(() => {
                             self.getVolume((volume) => {

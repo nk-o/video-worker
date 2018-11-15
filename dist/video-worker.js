@@ -1,6 +1,6 @@
 /*!
  * Name    : Video Worker
- * Version : 1.1.5
+ * Version : 1.1.6
  * Author  : nK <https://nkdev.info>
  * GitHub  : https://github.com/nk-o/video-worker
  */
@@ -643,6 +643,13 @@ var VideoWorker = function () {
                                 self.play(self.options.startTime);
                             }
                             self.fire('ready', e);
+
+                            // For seamless loops, set the endTime to 0.1 seconds less than the video's duration
+                            // https://github.com/nk-o/video-worker/issues/2
+                            if (self.options.loop && !self.options.endTime) {
+                                var secondsOffset = 0.1;
+                                self.options.endTime = self.player.getDuration() - secondsOffset;
+                            }
 
                             // volumechange
                             setInterval(function () {
