@@ -502,6 +502,9 @@ export default class VideoWorker {
                             clearInterval(ytProgressInterval);
                         }
                     },
+                    onError: function onError(e) {
+                        self.fire('error', e)
+                    }
                 };
 
                 const firstInit = !self.$video;
@@ -622,6 +625,9 @@ export default class VideoWorker {
                 self.player.on('volumechange', (e) => {
                     self.fire('volumechange', e);
                 });
+                self.player.on('error', function(e) {
+                    self.fire('error', e)
+                })
             }
 
             // Local
