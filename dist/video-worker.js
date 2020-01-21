@@ -941,6 +941,9 @@ var VideoWorker = function () {
             // load Vimeo API
             if (self.type === 'vimeo' && !VimeoAPIadded) {
                 VimeoAPIadded = 1;
+                if (typeof Vimeo !== 'undefined') {
+                    return;
+                }
                 src = 'https://player.vimeo.com/api/player.js';
             }
 
