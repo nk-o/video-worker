@@ -542,6 +542,7 @@ export default class VideoWorker {
                     self.playerOptions.byline = 0;
                     self.playerOptions.portrait = 0;
                     self.playerOptions.title = 0;
+                    self.playerOptions.background = 1;
                 }
 
 
