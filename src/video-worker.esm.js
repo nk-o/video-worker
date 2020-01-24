@@ -744,9 +744,12 @@ export default class VideoWorker {
         // load Vimeo API
         if (self.type === 'vimeo' && !VimeoAPIadded) {
             VimeoAPIadded = 1;
+
+            // Useful when Vimeo API added using RequireJS https://github.com/nk-o/video-worker/pull/7
             if (typeof Vimeo !== 'undefined') {
                 return;
             }
+
             src = 'https://player.vimeo.com/api/player.js';
         }
 
