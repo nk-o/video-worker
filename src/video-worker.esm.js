@@ -721,6 +721,9 @@ export default class VideoWorker {
                     });
                     self.fire('volumechange', e);
                 });
+                self.player.addEventListener('error', (e) => {
+                    self.fire('error', e);
+                });
             }
             callback(self.$video);
         });
