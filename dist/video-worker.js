@@ -1,6 +1,6 @@
 /*!
  * Name    : Video Worker
- * Version : 1.1.6
+ * Version : 1.1.7
  * Author  : nK <https://nkdev.info>
  * GitHub  : https://github.com/nk-o/video-worker
  */
@@ -297,10 +297,14 @@ function () {
       if (Youtube) {
         this.type = 'youtube';
         return Youtube;
-      } else if (Vimeo) {
+      }
+
+      if (Vimeo) {
         this.type = 'vimeo';
         return Vimeo;
-      } else if (Local) {
+      }
+
+      if (Local) {
         this.type = 'local';
         return Local;
       }
