@@ -70,6 +70,7 @@ started | `event` | Fires only once, when the video is started playing.
 play | `event` | Fires on video play start.
 pause | `event` | Fires on video paused.
 ended | `event` | Fires on video ended.
+error | `error` | Fires on video error
 
 ### Example
 ```javascript
