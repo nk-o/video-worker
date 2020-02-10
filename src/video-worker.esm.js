@@ -121,10 +121,14 @@ export default class VideoWorker {
         if (Youtube) {
             this.type = 'youtube';
             return Youtube;
-        } else if (Vimeo) {
+        }
+
+        if (Vimeo) {
             this.type = 'vimeo';
             return Vimeo;
-        } else if (Local) {
+        }
+
+        if (Local) {
             this.type = 'local';
             return Local;
         }
@@ -143,6 +147,7 @@ export default class VideoWorker {
         // add new callback in events list
         (this.userEventsList[name] || (this.userEventsList[name] = [])).push(callback);
     }
+
     off(name, callback) {
         if (!this.userEventsList || !this.userEventsList[name]) {
             return;
@@ -158,6 +163,7 @@ export default class VideoWorker {
             });
         }
     }
+
     fire(name) {
         const args = [].slice.call(arguments, 1);
         if (this.userEventsList && typeof this.userEventsList[name] !== 'undefined') {
@@ -503,8 +509,8 @@ export default class VideoWorker {
                         }
                     },
                     onError: function onError(e) {
-                        self.fire('error', e)
-                    }
+                        self.fire('error', e);
+                    },
                 };
 
                 const firstInit = !self.$video;
@@ -626,9 +632,9 @@ export default class VideoWorker {
                 self.player.on('volumechange', (e) => {
                     self.fire('volumechange', e);
                 });
-                self.player.on('error', function(e) {
-                    self.fire('error', e)
-                })
+                self.player.on('error', (e) => {
+                    self.fire('error', e);
+                });
             }
 
             // Local

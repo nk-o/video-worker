@@ -3,7 +3,8 @@ const $ = require('gulp-load-plugins')();
 const del = require('del');
 const named = require('vinyl-named');
 const webpack = require('webpack-stream');
-const data = require('json-file').read('./package.json').data;
+const { data } = require('json-file').read('./package.json');
+const webpackconfig = require('./webpack.config.js');
 
 function getHeader() {
     return `/*!
@@ -31,21 +32,12 @@ gulp.task('clean', () => del(['dist']));
 /**
  * JS Task
  */
-gulp.task('js', () => {
-    return gulp.src(['src/*.js', '!src/*.esm.js'])
+gulp.task('js', () => (
+    gulp.src(['src/*.js', '!src/*.esm.js'])
         .pipe($.plumber({ errorHandler }))
         .pipe(named())
         .pipe(webpack({
-            module: {
-                loaders: [
-                    {
-                        test: /\.js$/,
-                        use: [{
-                            loader: 'babel-loader',
-                        }],
-                    },
-                ],
-            },
+            config: webpackconfig,
         }))
         .pipe($.header(getHeader()))
         .pipe(gulp.dest('dist'))
@@ -56,14 +48,12 @@ gulp.task('js', () => {
             },
         }))
         .pipe($.sourcemaps.write('.'))
-        .pipe(gulp.dest('dist'));
-});
+        .pipe(gulp.dest('dist'))
+));
 
 /**
  * Build (default) Task
  */
-gulp.task('build', (cb) => {
-    $.sequence('clean', 'js', cb);
-});
+gulp.task('build', gulp.series('clean', 'js'));
 
-gulp.task('default', ['build']);
+gulp.task('default', gulp.series('build'));
