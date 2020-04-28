@@ -1,6 +1,6 @@
 /*!
  * Name    : Video Worker
- * Version : 1.1.7
+ * Version : 1.1.8
  * Author  : nK <https://nkdev.info>
  * GitHub  : https://github.com/nk-o/video-worker
  */
@@ -161,6 +161,8 @@ module.exports = g;
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return VideoWorker; });
+/* harmony import */ var global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var global__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(global__WEBPACK_IMPORTED_MODULE_0__);
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -169,11 +171,12 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-// Deferred
+ // Deferred
 // thanks http://stackoverflow.com/questions/18096715/implement-deferred-object-without-using-jquery
+
 function Deferred() {
-  this._done = [];
-  this._fail = [];
+  this.done = [];
+  this.fail = [];
 }
 
 Deferred.prototype = {
@@ -181,21 +184,30 @@ Deferred.prototype = {
     var i = list.length;
     args = Array.prototype.slice.call(args);
 
-    while (i--) {
+    while (i) {
+      i -= 1;
       list[i].apply(null, args);
     }
   },
   resolve: function resolve() {
-    this.execute(this._done, arguments);
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    this.execute(this.done, args);
   },
   reject: function reject() {
-    this.execute(this._fail, arguments);
+    for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
+    }
+
+    this.execute(this.fail, args);
   },
   done: function done(callback) {
-    this._done.push(callback);
+    this.done.push(callback);
   },
   fail: function fail(callback) {
-    this._fail.push(callback);
+    this.fail.push(callback);
   }
 };
 var ID = 0;
@@ -206,9 +218,7 @@ var loadingVimeoPlayer = 0;
 var loadingYoutubeDefer = new Deferred();
 var loadingVimeoDefer = new Deferred();
 
-var VideoWorker =
-/*#__PURE__*/
-function () {
+var VideoWorker = /*#__PURE__*/function () {
   function VideoWorker(url, options) {
     _classCallCheck(this, VideoWorker);
 
@@ -229,25 +239,30 @@ function () {
     self.videoID = self.parseURL(url); // init
 
     if (self.videoID) {
-      self.ID = ID++;
+      self.ID = ID;
+      ID += 1;
       self.loadAPI();
       self.init();
     }
   } // Extend like jQuery.extend
+  // eslint-disable-next-line class-methods-use-this
 
 
   _createClass(VideoWorker, [{
     key: "extend",
-    value: function extend(out) {
-      var _arguments = arguments;
-      out = out || {};
-      Object.keys(arguments).forEach(function (i) {
-        if (!_arguments[i]) {
+    value: function extend() {
+      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        args[_key3] = arguments[_key3];
+      }
+
+      var out = args[0] || {};
+      Object.keys(args).forEach(function (i) {
+        if (!args[i]) {
           return;
         }
 
-        Object.keys(_arguments[i]).forEach(function (key) {
-          out[key] = _arguments[i][key];
+        Object.keys(args[i]).forEach(function (key) {
+          out[key] = args[i][key];
         });
       });
       return out;
@@ -260,7 +275,7 @@ function () {
         // eslint-disable-next-line no-useless-escape
         var regExp = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/;
         var match = ytUrl.match(regExp);
-        return match && match[1].length === 11 ? match[1] : false;
+        return match && 11 === match[1].length ? match[1] : false;
       } // parse vimeo ID
 
 
@@ -283,7 +298,7 @@ function () {
 
           if (match && match[1] && match[2]) {
             // eslint-disable-next-line prefer-destructuring
-            result[match[1] === 'ogv' ? 'ogg' : match[1]] = match[2];
+            result['ogv' === match[1] ? 'ogg' : match[1]] = match[2];
             ready = 1;
           }
         });
@@ -348,9 +363,11 @@ function () {
     value: function fire(name) {
       var _this2 = this;
 
-      var args = [].slice.call(arguments, 1);
+      for (var _len4 = arguments.length, args = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+        args[_key4 - 1] = arguments[_key4];
+      }
 
-      if (this.userEventsList && typeof this.userEventsList[name] !== 'undefined') {
+      if (this.userEventsList && 'undefined' !== typeof this.userEventsList[name]) {
         this.userEventsList[name].forEach(function (val) {
           // call with all arguments
           if (val) {
@@ -368,18 +385,18 @@ function () {
         return;
       }
 
-      if (self.type === 'youtube' && self.player.playVideo) {
-        if (typeof start !== 'undefined') {
+      if ('youtube' === self.type && self.player.playVideo) {
+        if ('undefined' !== typeof start) {
           self.player.seekTo(start || 0);
         }
 
-        if (YT.PlayerState.PLAYING !== self.player.getPlayerState()) {
+        if (global__WEBPACK_IMPORTED_MODULE_0___default.a.YT.PlayerState.PLAYING !== self.player.getPlayerState()) {
           self.player.playVideo();
         }
       }
 
-      if (self.type === 'vimeo') {
-        if (typeof start !== 'undefined') {
+      if ('vimeo' === self.type) {
+        if ('undefined' !== typeof start) {
           self.player.setCurrentTime(start);
         }
 
@@ -390,8 +407,8 @@ function () {
         });
       }
 
-      if (self.type === 'local') {
-        if (typeof start !== 'undefined') {
+      if ('local' === self.type) {
+        if ('undefined' !== typeof start) {
           self.player.currentTime = start;
         }
 
@@ -409,13 +426,13 @@ function () {
         return;
       }
 
-      if (self.type === 'youtube' && self.player.pauseVideo) {
-        if (YT.PlayerState.PLAYING === self.player.getPlayerState()) {
+      if ('youtube' === self.type && self.player.pauseVideo) {
+        if (global__WEBPACK_IMPORTED_MODULE_0___default.a.YT.PlayerState.PLAYING === self.player.getPlayerState()) {
           self.player.pauseVideo();
         }
       }
 
-      if (self.type === 'vimeo') {
+      if ('vimeo' === self.type) {
         self.player.getPaused().then(function (paused) {
           if (!paused) {
             self.player.pause();
@@ -423,7 +440,7 @@ function () {
         });
       }
 
-      if (self.type === 'local') {
+      if ('local' === self.type) {
         if (!self.player.paused) {
           self.player.pause();
         }
@@ -438,15 +455,15 @@ function () {
         return;
       }
 
-      if (self.type === 'youtube' && self.player.mute) {
+      if ('youtube' === self.type && self.player.mute) {
         self.player.mute();
       }
 
-      if (self.type === 'vimeo' && self.player.setVolume) {
+      if ('vimeo' === self.type && self.player.setVolume) {
         self.player.setVolume(0);
       }
 
-      if (self.type === 'local') {
+      if ('local' === self.type) {
         self.$video.muted = true;
       }
     }
@@ -459,15 +476,15 @@ function () {
         return;
       }
 
-      if (self.type === 'youtube' && self.player.mute) {
+      if ('youtube' === self.type && self.player.mute) {
         self.player.unMute();
       }
 
-      if (self.type === 'vimeo' && self.player.setVolume) {
+      if ('vimeo' === self.type && self.player.setVolume) {
         self.player.setVolume(self.options.volume);
       }
 
-      if (self.type === 'local') {
+      if ('local' === self.type) {
         self.$video.muted = false;
       }
     }
@@ -481,15 +498,15 @@ function () {
         return;
       }
 
-      if (self.type === 'youtube' && self.player.setVolume) {
+      if ('youtube' === self.type && self.player.setVolume) {
         self.player.setVolume(volume);
       }
 
-      if (self.type === 'vimeo' && self.player.setVolume) {
+      if ('vimeo' === self.type && self.player.setVolume) {
         self.player.setVolume(volume);
       }
 
-      if (self.type === 'local') {
+      if ('local' === self.type) {
         self.$video.volume = volume / 100;
       }
     }
@@ -503,17 +520,17 @@ function () {
         return;
       }
 
-      if (self.type === 'youtube' && self.player.getVolume) {
+      if ('youtube' === self.type && self.player.getVolume) {
         callback(self.player.getVolume());
       }
 
-      if (self.type === 'vimeo' && self.player.getVolume) {
+      if ('vimeo' === self.type && self.player.getVolume) {
         self.player.getVolume().then(function (volume) {
           callback(volume);
         });
       }
 
-      if (self.type === 'local') {
+      if ('local' === self.type) {
         callback(self.$video.volume * 100);
       }
     }
@@ -527,17 +544,17 @@ function () {
         return;
       }
 
-      if (self.type === 'youtube' && self.player.isMuted) {
+      if ('youtube' === self.type && self.player.isMuted) {
         callback(self.player.isMuted());
       }
 
-      if (self.type === 'vimeo' && self.player.getVolume) {
+      if ('vimeo' === self.type && self.player.getVolume) {
         self.player.getVolume().then(function (volume) {
           callback(!!volume);
         });
       }
 
-      if (self.type === 'local') {
+      if ('local' === self.type) {
         callback(self.$video.muted);
       }
     }
@@ -551,20 +568,20 @@ function () {
         return;
       }
 
-      if (self.type === 'youtube') {
+      if ('youtube' === self.type) {
         var availableSizes = ['maxresdefault', 'sddefault', 'hqdefault', '0'];
         var step = 0;
         var tempImg = new Image();
 
         tempImg.onload = function () {
           // if no thumbnail, youtube add their own image with width = 120px
-          if ((this.naturalWidth || this.width) !== 120 || step === availableSizes.length - 1) {
+          if (120 !== (this.naturalWidth || this.width) || step === availableSizes.length - 1) {
             // ok
             self.videoImage = "https://img.youtube.com/vi/".concat(self.videoID, "/").concat(availableSizes[step], ".jpg");
             callback(self.videoImage);
           } else {
             // try another size
-            step++;
+            step += 1;
             this.src = "https://img.youtube.com/vi/".concat(self.videoID, "/").concat(availableSizes[step], ".jpg");
           }
         };
@@ -572,13 +589,13 @@ function () {
         tempImg.src = "https://img.youtube.com/vi/".concat(self.videoID, "/").concat(availableSizes[step], ".jpg");
       }
 
-      if (self.type === 'vimeo') {
+      if ('vimeo' === self.type) {
         var request = new XMLHttpRequest();
         request.open('GET', "https://vimeo.com/api/v2/video/".concat(self.videoID, ".json"), true);
 
         request.onreadystatechange = function () {
-          if (this.readyState === 4) {
-            if (this.status >= 200 && this.status < 400) {
+          if (4 === this.readyState) {
+            if (200 <= this.status && 400 > this.status) {
               // Success!
               var response = JSON.parse(this.responseText);
               self.videoImage = response[0].thumbnail_large;
@@ -618,7 +635,7 @@ function () {
         } // Youtube
 
 
-        if (self.type === 'youtube') {
+        if ('youtube' === self.type) {
           self.playerOptions = {};
           self.playerOptions.videoId = self.videoID;
           self.playerOptions.playerVars = {
@@ -674,29 +691,29 @@ function () {
             },
             onStateChange: function onStateChange(e) {
               // loop
-              if (self.options.loop && e.data === YT.PlayerState.ENDED) {
+              if (self.options.loop && e.data === global__WEBPACK_IMPORTED_MODULE_0___default.a.YT.PlayerState.ENDED) {
                 self.play(self.options.startTime);
               }
 
-              if (!ytStarted && e.data === YT.PlayerState.PLAYING) {
+              if (!ytStarted && e.data === global__WEBPACK_IMPORTED_MODULE_0___default.a.YT.PlayerState.PLAYING) {
                 ytStarted = 1;
                 self.fire('started', e);
               }
 
-              if (e.data === YT.PlayerState.PLAYING) {
+              if (e.data === global__WEBPACK_IMPORTED_MODULE_0___default.a.YT.PlayerState.PLAYING) {
                 self.fire('play', e);
               }
 
-              if (e.data === YT.PlayerState.PAUSED) {
+              if (e.data === global__WEBPACK_IMPORTED_MODULE_0___default.a.YT.PlayerState.PAUSED) {
                 self.fire('pause', e);
               }
 
-              if (e.data === YT.PlayerState.ENDED) {
+              if (e.data === global__WEBPACK_IMPORTED_MODULE_0___default.a.YT.PlayerState.ENDED) {
                 self.fire('ended', e);
               } // progress check
 
 
-              if (e.data === YT.PlayerState.PLAYING) {
+              if (e.data === global__WEBPACK_IMPORTED_MODULE_0___default.a.YT.PlayerState.PLAYING) {
                 ytProgressInterval = setInterval(function () {
                   self.fire('timeupdate', e); // check for end of video and play again or stop
 
@@ -725,7 +742,7 @@ function () {
             document.body.appendChild(hiddenDiv);
           }
 
-          self.player = self.player || new window.YT.Player(self.playerID, self.playerOptions);
+          self.player = self.player || new global__WEBPACK_IMPORTED_MODULE_0___default.a.YT.Player(self.playerID, self.playerOptions);
 
           if (firstInit) {
             self.$video = document.getElementById(self.playerID); // get video width and height
@@ -736,7 +753,7 @@ function () {
         } // Vimeo
 
 
-        if (self.type === 'vimeo') {
+        if ('vimeo' === self.type) {
           self.playerOptions = {
             id: self.videoID,
             autopause: 0,
@@ -762,7 +779,7 @@ function () {
           if (!self.$video) {
             var playerOptionsString = '';
             Object.keys(self.playerOptions).forEach(function (key) {
-              if (playerOptionsString !== '') {
+              if ('' !== playerOptionsString) {
                 playerOptionsString += '&';
               }
 
@@ -780,7 +797,7 @@ function () {
             document.body.appendChild(hiddenDiv);
           }
 
-          self.player = self.player || new Vimeo.Player(self.$video, self.playerOptions); // set current time for autoplay
+          self.player = self.player || new global__WEBPACK_IMPORTED_MODULE_0___default.a.Vimeo.Player(self.$video, self.playerOptions); // set current time for autoplay
 
           if (self.options.startTime && self.options.autoplay) {
             self.player.setCurrentTime(self.options.startTime);
@@ -816,7 +833,7 @@ function () {
           self.player.on('play', function (e) {
             self.fire('play', e); // check for the start time and start with it
 
-            if (self.options.startTime && e.seconds === 0) {
+            if (self.options.startTime && 0 === e.seconds) {
               self.play(self.options.startTime);
             }
           });
@@ -845,7 +862,7 @@ function () {
           element.appendChild(source);
         }
 
-        if (self.type === 'local') {
+        if ('local' === self.type) {
           if (!self.$video) {
             self.$video = document.createElement('video'); // show controls
 
@@ -948,16 +965,16 @@ function () {
 
       var src = ''; // load Youtube API
 
-      if (self.type === 'youtube' && !YoutubeAPIadded) {
+      if ('youtube' === self.type && !YoutubeAPIadded) {
         YoutubeAPIadded = 1;
         src = 'https://www.youtube.com/iframe_api';
       } // load Vimeo API
 
 
-      if (self.type === 'vimeo' && !VimeoAPIadded) {
+      if ('vimeo' === self.type && !VimeoAPIadded) {
         VimeoAPIadded = 1; // Useful when Vimeo API added using RequireJS https://github.com/nk-o/video-worker/pull/7
 
-        if (typeof Vimeo !== 'undefined') {
+        if ('undefined' !== typeof global__WEBPACK_IMPORTED_MODULE_0___default.a.Vimeo) {
           return;
         }
 
@@ -981,9 +998,9 @@ function () {
     value: function onAPIready(callback) {
       var self = this; // Youtube
 
-      if (self.type === 'youtube') {
+      if ('youtube' === self.type) {
         // Listen for global YT player callback
-        if ((typeof YT === 'undefined' || YT.loaded === 0) && !loadingYoutubePlayer) {
+        if (('undefined' === typeof global__WEBPACK_IMPORTED_MODULE_0___default.a.YT || 0 === global__WEBPACK_IMPORTED_MODULE_0___default.a.YT.loaded) && !loadingYoutubePlayer) {
           // Prevents Ready event from being called twice
           loadingYoutubePlayer = 1; // Creates deferred so, other players know when to wait.
 
@@ -992,7 +1009,7 @@ function () {
             loadingYoutubeDefer.resolve('done');
             callback();
           };
-        } else if ((typeof YT === "undefined" ? "undefined" : _typeof(YT)) === 'object' && YT.loaded === 1) {
+        } else if ('object' === _typeof(global__WEBPACK_IMPORTED_MODULE_0___default.a.YT) && 1 === global__WEBPACK_IMPORTED_MODULE_0___default.a.YT.loaded) {
           callback();
         } else {
           loadingYoutubeDefer.done(function () {
@@ -1002,17 +1019,17 @@ function () {
       } // Vimeo
 
 
-      if (self.type === 'vimeo') {
-        if (typeof Vimeo === 'undefined' && !loadingVimeoPlayer) {
+      if ('vimeo' === self.type) {
+        if ('undefined' === typeof global__WEBPACK_IMPORTED_MODULE_0___default.a.Vimeo && !loadingVimeoPlayer) {
           loadingVimeoPlayer = 1;
           var vimeoInterval = setInterval(function () {
-            if (typeof Vimeo !== 'undefined') {
+            if ('undefined' !== typeof global__WEBPACK_IMPORTED_MODULE_0___default.a.Vimeo) {
               clearInterval(vimeoInterval);
               loadingVimeoDefer.resolve('done');
               callback();
             }
           }, 20);
-        } else if (typeof Vimeo !== 'undefined') {
+        } else if ('undefined' !== typeof global__WEBPACK_IMPORTED_MODULE_0___default.a.Vimeo) {
           callback();
         } else {
           loadingVimeoDefer.done(function () {
@@ -1022,7 +1039,7 @@ function () {
       } // Local
 
 
-      if (self.type === 'local') {
+      if ('local' === self.type) {
         callback();
       }
     }
