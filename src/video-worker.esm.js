@@ -1,28 +1,33 @@
+import global from 'global';
+
 // Deferred
 // thanks http://stackoverflow.com/questions/18096715/implement-deferred-object-without-using-jquery
 function Deferred() {
-    this._done = [];
-    this._fail = [];
+    this.done = [];
+    this.fail = [];
 }
+
 Deferred.prototype = {
-    execute(list, args) {
+    execute( list, args ) {
         let i = list.length;
-        args = Array.prototype.slice.call(args);
-        while (i--) {
-            list[i].apply(null, args);
+        args = Array.prototype.slice.call( args );
+
+        while ( i ) {
+            i -= 1;
+            list[ i ].apply( null, args );
         }
     },
-    resolve() {
-        this.execute(this._done, arguments);
+    resolve( ...args ) {
+        this.execute( this.done, args );
     },
-    reject() {
-        this.execute(this._fail, arguments);
+    reject( ...args ) {
+        this.execute( this.fail, args );
     },
-    done(callback) {
-        this._done.push(callback);
+    done( callback ) {
+        this.done.push( callback );
     },
-    fail(callback) {
-        this._fail.push(callback);
+    fail( callback ) {
+        this.fail.push( callback );
     },
 };
 
@@ -35,7 +40,7 @@ const loadingYoutubeDefer = new Deferred();
 const loadingVimeoDefer = new Deferred();
 
 export default class VideoWorker {
-    constructor(url, options) {
+    constructor( url, options ) {
         const self = this;
 
         self.url = url;
@@ -52,83 +57,86 @@ export default class VideoWorker {
             endTime: 0,
         };
 
-        self.options = self.extend({}, self.options_default, options);
+        self.options = self.extend( {}, self.options_default, options );
 
         // check URL
-        self.videoID = self.parseURL(url);
+        self.videoID = self.parseURL( url );
 
         // init
-        if (self.videoID) {
-            self.ID = ID++;
+        if ( self.videoID ) {
+            self.ID = ID;
+            ID += 1;
             self.loadAPI();
             self.init();
         }
     }
 
     // Extend like jQuery.extend
-    extend(out) {
-        out = out || {};
-        Object.keys(arguments).forEach((i) => {
-            if (!arguments[i]) {
+    static extend( ...args ) {
+        const out = args[ 0 ] || {};
+
+        Object.keys( args ).forEach( ( i ) => {
+            if ( ! args[ i ] ) {
                 return;
             }
-            Object.keys(arguments[i]).forEach((key) => {
-                out[key] = arguments[i][key];
-            });
-        });
+            Object.keys( args[ i ] ).forEach( ( key ) => {
+                out[ key ] = args[ i ][ key ];
+            } );
+        } );
+
         return out;
     }
 
-    parseURL(url) {
+    parseURL( url ) {
         // parse youtube ID
-        function getYoutubeID(ytUrl) {
+        function getYoutubeID( ytUrl ) {
             // eslint-disable-next-line no-useless-escape
             const regExp = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/;
-            const match = ytUrl.match(regExp);
-            return match && match[1].length === 11 ? match[1] : false;
+            const match = ytUrl.match( regExp );
+            return match && 11 === match[ 1 ].length ? match[ 1 ] : false;
         }
 
         // parse vimeo ID
-        function getVimeoID(vmUrl) {
+        function getVimeoID( vmUrl ) {
             // eslint-disable-next-line no-useless-escape
             const regExp = /https?:\/\/(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|album\/(\d+)\/video\/|video\/|)(\d+)(?:$|\/|\?)/;
-            const match = vmUrl.match(regExp);
-            return match && match[3] ? match[3] : false;
+            const match = vmUrl.match( regExp );
+            return match && match[ 3 ] ? match[ 3 ] : false;
         }
 
         // parse local string
-        function getLocalVideos(locUrl) {
+        function getLocalVideos( locUrl ) {
             // eslint-disable-next-line no-useless-escape
-            const videoFormats = locUrl.split(/,(?=mp4\:|webm\:|ogv\:|ogg\:)/);
+            const videoFormats = locUrl.split( /,(?=mp4\:|webm\:|ogv\:|ogg\:)/ );
             const result = {};
             let ready = 0;
-            videoFormats.forEach((val) => {
+            videoFormats.forEach( ( val ) => {
                 // eslint-disable-next-line no-useless-escape
-                const match = val.match(/^(mp4|webm|ogv|ogg)\:(.*)/);
-                if (match && match[1] && match[2]) {
+                const match = val.match( /^(mp4|webm|ogv|ogg)\:(.*)/ );
+                if ( match && match[ 1 ] && match[ 2 ] ) {
                     // eslint-disable-next-line prefer-destructuring
-                    result[match[1] === 'ogv' ? 'ogg' : match[1]] = match[2];
+                    result[ 'ogv' === match[ 1 ] ? 'ogg' : match[ 1 ] ] = match[ 2 ];
                     ready = 1;
                 }
-            });
+            } );
             return ready ? result : false;
         }
 
-        const Youtube = getYoutubeID(url);
-        const Vimeo = getVimeoID(url);
-        const Local = getLocalVideos(url);
+        const Youtube = getYoutubeID( url );
+        const Vimeo = getVimeoID( url );
+        const Local = getLocalVideos( url );
 
-        if (Youtube) {
+        if ( Youtube ) {
             this.type = 'youtube';
             return Youtube;
         }
 
-        if (Vimeo) {
+        if ( Vimeo ) {
             this.type = 'vimeo';
             return Vimeo;
         }
 
-        if (Local) {
+        if ( Local ) {
             this.type = 'local';
             return Local;
         }
@@ -137,76 +145,75 @@ export default class VideoWorker {
     }
 
     isValid() {
-        return !!this.videoID;
+        return !! this.videoID;
     }
 
     // events
-    on(name, callback) {
+    on( name, callback ) {
         this.userEventsList = this.userEventsList || [];
 
         // add new callback in events list
-        (this.userEventsList[name] || (this.userEventsList[name] = [])).push(callback);
+        ( this.userEventsList[ name ] || ( this.userEventsList[ name ] = [] ) ).push( callback );
     }
 
-    off(name, callback) {
-        if (!this.userEventsList || !this.userEventsList[name]) {
+    off( name, callback ) {
+        if ( ! this.userEventsList || ! this.userEventsList[ name ] ) {
             return;
         }
 
-        if (!callback) {
-            delete this.userEventsList[name];
+        if ( ! callback ) {
+            delete this.userEventsList[ name ];
         } else {
-            this.userEventsList[name].forEach((val, key) => {
-                if (val === callback) {
-                    this.userEventsList[name][key] = false;
+            this.userEventsList[ name ].forEach( ( val, key ) => {
+                if ( val === callback ) {
+                    this.userEventsList[ name ][ key ] = false;
                 }
-            });
+            } );
         }
     }
 
-    fire(name) {
-        const args = [].slice.call(arguments, 1);
-        if (this.userEventsList && typeof this.userEventsList[name] !== 'undefined') {
-            this.userEventsList[name].forEach((val) => {
+    fire( name, ...args ) {
+        if ( this.userEventsList && 'undefined' !== typeof this.userEventsList[ name ] ) {
+            this.userEventsList[ name ].forEach( ( val ) => {
                 // call with all arguments
-                if (val) {
-                    val.apply(this, args);
+                if ( val ) {
+                    val.apply( this, args );
                 }
-            });
+            } );
         }
     }
 
-    play(start) {
+    play( start ) {
         const self = this;
-        if (!self.player) {
+        if ( ! self.player ) {
             return;
         }
 
-        if (self.type === 'youtube' && self.player.playVideo) {
-            if (typeof start !== 'undefined') {
-                self.player.seekTo(start || 0);
+        if ( 'youtube' === self.type && self.player.playVideo ) {
+            if ( 'undefined' !== typeof start ) {
+                self.player.seekTo( start || 0 );
             }
-            if (YT.PlayerState.PLAYING !== self.player.getPlayerState()) {
+            if ( global.YT.PlayerState.PLAYING !== self.player.getPlayerState() ) {
                 self.player.playVideo();
             }
         }
 
-        if (self.type === 'vimeo') {
-            if (typeof start !== 'undefined') {
-                self.player.setCurrentTime(start);
+        if ( 'vimeo' === self.type ) {
+            if ( 'undefined' !== typeof start ) {
+                self.player.setCurrentTime( start );
             }
-            self.player.getPaused().then((paused) => {
-                if (paused) {
+            self.player.getPaused().then( ( paused ) => {
+                if ( paused ) {
                     self.player.play();
                 }
-            });
+            } );
         }
 
-        if (self.type === 'local') {
-            if (typeof start !== 'undefined') {
+        if ( 'local' === self.type ) {
+            if ( 'undefined' !== typeof start ) {
                 self.player.currentTime = start;
             }
-            if (self.player.paused) {
+            if ( self.player.paused ) {
                 self.player.play();
             }
         }
@@ -214,26 +221,26 @@ export default class VideoWorker {
 
     pause() {
         const self = this;
-        if (!self.player) {
+        if ( ! self.player ) {
             return;
         }
 
-        if (self.type === 'youtube' && self.player.pauseVideo) {
-            if (YT.PlayerState.PLAYING === self.player.getPlayerState()) {
+        if ( 'youtube' === self.type && self.player.pauseVideo ) {
+            if ( global.YT.PlayerState.PLAYING === self.player.getPlayerState() ) {
                 self.player.pauseVideo();
             }
         }
 
-        if (self.type === 'vimeo') {
-            self.player.getPaused().then((paused) => {
-                if (!paused) {
+        if ( 'vimeo' === self.type ) {
+            self.player.getPaused().then( ( paused ) => {
+                if ( ! paused ) {
                     self.player.pause();
                 }
-            });
+            } );
         }
 
-        if (self.type === 'local') {
-            if (!self.player.paused) {
+        if ( 'local' === self.type ) {
+            if ( ! self.player.paused ) {
                 self.player.pause();
             }
         }
@@ -241,114 +248,114 @@ export default class VideoWorker {
 
     mute() {
         const self = this;
-        if (!self.player) {
+        if ( ! self.player ) {
             return;
         }
 
-        if (self.type === 'youtube' && self.player.mute) {
+        if ( 'youtube' === self.type && self.player.mute ) {
             self.player.mute();
         }
 
-        if (self.type === 'vimeo' && self.player.setVolume) {
-            self.player.setVolume(0);
+        if ( 'vimeo' === self.type && self.player.setVolume ) {
+            self.player.setVolume( 0 );
         }
 
-        if (self.type === 'local') {
+        if ( 'local' === self.type ) {
             self.$video.muted = true;
         }
     }
 
     unmute() {
         const self = this;
-        if (!self.player) {
+        if ( ! self.player ) {
             return;
         }
 
-        if (self.type === 'youtube' && self.player.mute) {
+        if ( 'youtube' === self.type && self.player.mute ) {
             self.player.unMute();
         }
 
-        if (self.type === 'vimeo' && self.player.setVolume) {
-            self.player.setVolume(self.options.volume);
+        if ( 'vimeo' === self.type && self.player.setVolume ) {
+            self.player.setVolume( self.options.volume );
         }
 
-        if (self.type === 'local') {
+        if ( 'local' === self.type ) {
             self.$video.muted = false;
         }
     }
 
-    setVolume(volume = false) {
+    setVolume( volume = false ) {
         const self = this;
-        if (!self.player || !volume) {
+        if ( ! self.player || ! volume ) {
             return;
         }
 
-        if (self.type === 'youtube' && self.player.setVolume) {
-            self.player.setVolume(volume);
+        if ( 'youtube' === self.type && self.player.setVolume ) {
+            self.player.setVolume( volume );
         }
 
-        if (self.type === 'vimeo' && self.player.setVolume) {
-            self.player.setVolume(volume);
+        if ( 'vimeo' === self.type && self.player.setVolume ) {
+            self.player.setVolume( volume );
         }
 
-        if (self.type === 'local') {
+        if ( 'local' === self.type ) {
             self.$video.volume = volume / 100;
         }
     }
 
-    getVolume(callback) {
+    getVolume( callback ) {
         const self = this;
-        if (!self.player) {
-            callback(false);
+        if ( ! self.player ) {
+            callback( false );
             return;
         }
 
-        if (self.type === 'youtube' && self.player.getVolume) {
-            callback(self.player.getVolume());
+        if ( 'youtube' === self.type && self.player.getVolume ) {
+            callback( self.player.getVolume() );
         }
 
-        if (self.type === 'vimeo' && self.player.getVolume) {
-            self.player.getVolume().then((volume) => {
-                callback(volume);
-            });
+        if ( 'vimeo' === self.type && self.player.getVolume ) {
+            self.player.getVolume().then( ( volume ) => {
+                callback( volume );
+            } );
         }
 
-        if (self.type === 'local') {
-            callback(self.$video.volume * 100);
+        if ( 'local' === self.type ) {
+            callback( self.$video.volume * 100 );
         }
     }
 
-    getMuted(callback) {
+    getMuted( callback ) {
         const self = this;
-        if (!self.player) {
-            callback(null);
+        if ( ! self.player ) {
+            callback( null );
             return;
         }
 
-        if (self.type === 'youtube' && self.player.isMuted) {
-            callback(self.player.isMuted());
+        if ( 'youtube' === self.type && self.player.isMuted ) {
+            callback( self.player.isMuted() );
         }
 
-        if (self.type === 'vimeo' && self.player.getVolume) {
-            self.player.getVolume().then((volume) => {
-                callback(!!volume);
-            });
+        if ( 'vimeo' === self.type && self.player.getVolume ) {
+            self.player.getVolume().then( ( volume ) => {
+                callback( !! volume );
+            } );
         }
 
-        if (self.type === 'local') {
-            callback(self.$video.muted);
+        if ( 'local' === self.type ) {
+            callback( self.$video.muted );
         }
     }
 
-    getImageURL(callback) {
+    getImageURL( callback ) {
         const self = this;
 
-        if (self.videoImage) {
-            callback(self.videoImage);
+        if ( self.videoImage ) {
+            callback( self.videoImage );
             return;
         }
 
-        if (self.type === 'youtube') {
+        if ( 'youtube' === self.type ) {
             const availableSizes = [
                 'maxresdefault',
                 'sddefault',
@@ -358,31 +365,31 @@ export default class VideoWorker {
             let step = 0;
 
             const tempImg = new Image();
-            tempImg.onload = function () {
+            tempImg.onload = function() {
                 // if no thumbnail, youtube add their own image with width = 120px
-                if ((this.naturalWidth || this.width) !== 120 || step === availableSizes.length - 1) {
+                if ( 120 !== ( this.naturalWidth || this.width ) || step === availableSizes.length - 1 ) {
                     // ok
-                    self.videoImage = `https://img.youtube.com/vi/${self.videoID}/${availableSizes[step]}.jpg`;
-                    callback(self.videoImage);
+                    self.videoImage = `https://img.youtube.com/vi/${ self.videoID }/${ availableSizes[ step ] }.jpg`;
+                    callback( self.videoImage );
                 } else {
                     // try another size
-                    step++;
-                    this.src = `https://img.youtube.com/vi/${self.videoID}/${availableSizes[step]}.jpg`;
+                    step += 1;
+                    this.src = `https://img.youtube.com/vi/${ self.videoID }/${ availableSizes[ step ] }.jpg`;
                 }
             };
-            tempImg.src = `https://img.youtube.com/vi/${self.videoID}/${availableSizes[step]}.jpg`;
+            tempImg.src = `https://img.youtube.com/vi/${ self.videoID }/${ availableSizes[ step ] }.jpg`;
         }
 
-        if (self.type === 'vimeo') {
+        if ( 'vimeo' === self.type ) {
             let request = new XMLHttpRequest();
-            request.open('GET', `https://vimeo.com/api/v2/video/${self.videoID}.json`, true);
-            request.onreadystatechange = function () {
-                if (this.readyState === 4) {
-                    if (this.status >= 200 && this.status < 400) {
+            request.open( 'GET', `https://vimeo.com/api/v2/video/${ self.videoID }.json`, true );
+            request.onreadystatechange = function() {
+                if ( 4 === this.readyState ) {
+                    if ( 200 <= this.status && 400 > this.status ) {
                         // Success!
-                        const response = JSON.parse(this.responseText);
-                        self.videoImage = response[0].thumbnail_large;
-                        callback(self.videoImage);
+                        const response = JSON.parse( this.responseText );
+                        self.videoImage = response[ 0 ].thumbnail_large;
+                        callback( self.videoImage );
                     } else {
                         // Error :(
                     }
@@ -394,29 +401,29 @@ export default class VideoWorker {
     }
 
     // fallback to the old version.
-    getIframe(callback) {
-        this.getVideo(callback);
+    getIframe( callback ) {
+        this.getVideo( callback );
     }
 
-    getVideo(callback) {
+    getVideo( callback ) {
         const self = this;
 
         // return generated video block
-        if (self.$video) {
-            callback(self.$video);
+        if ( self.$video ) {
+            callback( self.$video );
             return;
         }
 
         // generate new video block
-        self.onAPIready(() => {
+        self.onAPIready( () => {
             let hiddenDiv;
-            if (!self.$video) {
-                hiddenDiv = document.createElement('div');
+            if ( ! self.$video ) {
+                hiddenDiv = document.createElement( 'div' );
                 hiddenDiv.style.display = 'none';
             }
 
             // Youtube
-            if (self.type === 'youtube') {
+            if ( 'youtube' === self.type ) {
                 self.playerOptions = {};
                 self.playerOptions.videoId = self.videoID;
                 self.playerOptions.playerVars = {
@@ -428,7 +435,7 @@ export default class VideoWorker {
                 };
 
                 // hide controls
-                if (!self.options.showContols) {
+                if ( ! self.options.showContols ) {
                     self.playerOptions.playerVars.iv_load_policy = 3;
                     self.playerOptions.playerVars.modestbranding = 1;
                     self.playerOptions.playerVars.controls = 0;
@@ -440,98 +447,98 @@ export default class VideoWorker {
                 let ytStarted;
                 let ytProgressInterval;
                 self.playerOptions.events = {
-                    onReady(e) {
+                    onReady( e ) {
                         // mute
-                        if (self.options.mute) {
+                        if ( self.options.mute ) {
                             e.target.mute();
-                        } else if (self.options.volume) {
-                            e.target.setVolume(self.options.volume);
+                        } else if ( self.options.volume ) {
+                            e.target.setVolume( self.options.volume );
                         }
 
                         // autoplay
-                        if (self.options.autoplay) {
-                            self.play(self.options.startTime);
+                        if ( self.options.autoplay ) {
+                            self.play( self.options.startTime );
                         }
-                        self.fire('ready', e);
+                        self.fire( 'ready', e );
 
                         // For seamless loops, set the endTime to 0.1 seconds less than the video's duration
                         // https://github.com/nk-o/video-worker/issues/2
-                        if (self.options.loop && !self.options.endTime) {
+                        if ( self.options.loop && ! self.options.endTime ) {
                             const secondsOffset = 0.1;
                             self.options.endTime = self.player.getDuration() - secondsOffset;
                         }
 
                         // volumechange
-                        setInterval(() => {
-                            self.getVolume((volume) => {
-                                if (self.options.volume !== volume) {
+                        setInterval( () => {
+                            self.getVolume( ( volume ) => {
+                                if ( self.options.volume !== volume ) {
                                     self.options.volume = volume;
-                                    self.fire('volumechange', e);
+                                    self.fire( 'volumechange', e );
                                 }
-                            });
-                        }, 150);
+                            } );
+                        }, 150 );
                     },
-                    onStateChange(e) {
+                    onStateChange( e ) {
                         // loop
-                        if (self.options.loop && e.data === YT.PlayerState.ENDED) {
-                            self.play(self.options.startTime);
+                        if ( self.options.loop && e.data === global.YT.PlayerState.ENDED ) {
+                            self.play( self.options.startTime );
                         }
-                        if (!ytStarted && e.data === YT.PlayerState.PLAYING) {
+                        if ( ! ytStarted && e.data === global.YT.PlayerState.PLAYING ) {
                             ytStarted = 1;
-                            self.fire('started', e);
+                            self.fire( 'started', e );
                         }
-                        if (e.data === YT.PlayerState.PLAYING) {
-                            self.fire('play', e);
+                        if ( e.data === global.YT.PlayerState.PLAYING ) {
+                            self.fire( 'play', e );
                         }
-                        if (e.data === YT.PlayerState.PAUSED) {
-                            self.fire('pause', e);
+                        if ( e.data === global.YT.PlayerState.PAUSED ) {
+                            self.fire( 'pause', e );
                         }
-                        if (e.data === YT.PlayerState.ENDED) {
-                            self.fire('ended', e);
+                        if ( e.data === global.YT.PlayerState.ENDED ) {
+                            self.fire( 'ended', e );
                         }
 
                         // progress check
-                        if (e.data === YT.PlayerState.PLAYING) {
-                            ytProgressInterval = setInterval(() => {
-                                self.fire('timeupdate', e);
+                        if ( e.data === global.YT.PlayerState.PLAYING ) {
+                            ytProgressInterval = setInterval( () => {
+                                self.fire( 'timeupdate', e );
 
                                 // check for end of video and play again or stop
-                                if (self.options.endTime && self.player.getCurrentTime() >= self.options.endTime) {
-                                    if (self.options.loop) {
-                                        self.play(self.options.startTime);
+                                if ( self.options.endTime && self.player.getCurrentTime() >= self.options.endTime ) {
+                                    if ( self.options.loop ) {
+                                        self.play( self.options.startTime );
                                     } else {
                                         self.pause();
                                     }
                                 }
-                            }, 150);
+                            }, 150 );
                         } else {
-                            clearInterval(ytProgressInterval);
+                            clearInterval( ytProgressInterval );
                         }
                     },
-                    onError: function onError(e) {
-                        self.fire('error', e);
+                    onError( e ) {
+                        self.fire( 'error', e );
                     },
                 };
 
-                const firstInit = !self.$video;
-                if (firstInit) {
-                    const div = document.createElement('div');
-                    div.setAttribute('id', self.playerID);
-                    hiddenDiv.appendChild(div);
-                    document.body.appendChild(hiddenDiv);
+                const firstInit = ! self.$video;
+                if ( firstInit ) {
+                    const div = document.createElement( 'div' );
+                    div.setAttribute( 'id', self.playerID );
+                    hiddenDiv.appendChild( div );
+                    document.body.appendChild( hiddenDiv );
                 }
-                self.player = self.player || new window.YT.Player(self.playerID, self.playerOptions);
-                if (firstInit) {
-                    self.$video = document.getElementById(self.playerID);
+                self.player = self.player || new global.YT.Player( self.playerID, self.playerOptions );
+                if ( firstInit ) {
+                    self.$video = document.getElementById( self.playerID );
 
                     // get video width and height
-                    self.videoWidth = parseInt(self.$video.getAttribute('width'), 10) || 1280;
-                    self.videoHeight = parseInt(self.$video.getAttribute('height'), 10) || 720;
+                    self.videoWidth = parseInt( self.$video.getAttribute( 'width' ), 10 ) || 1280;
+                    self.videoHeight = parseInt( self.$video.getAttribute( 'height' ), 10 ) || 720;
                 }
             }
 
             // Vimeo
-            if (self.type === 'vimeo') {
+            if ( 'vimeo' === self.type ) {
                 self.playerOptions = {
                     id: self.videoID,
                     autopause: 0,
@@ -541,12 +548,12 @@ export default class VideoWorker {
                     muted: self.options.mute ? 1 : 0,
                 };
 
-                if (self.options.volume) {
+                if ( self.options.volume ) {
                     self.playerOptions.volume = self.options.volume;
                 }
 
                 // hide controls
-                if (!self.options.showContols) {
+                if ( ! self.options.showContols ) {
                     self.playerOptions.badge = 0;
                     self.playerOptions.byline = 0;
                     self.playerOptions.portrait = 0;
@@ -555,282 +562,282 @@ export default class VideoWorker {
                 }
 
 
-                if (!self.$video) {
+                if ( ! self.$video ) {
                     let playerOptionsString = '';
-                    Object.keys(self.playerOptions).forEach((key) => {
-                        if (playerOptionsString !== '') {
+                    Object.keys( self.playerOptions ).forEach( ( key ) => {
+                        if ( '' !== playerOptionsString ) {
                             playerOptionsString += '&';
                         }
-                        playerOptionsString += `${key}=${encodeURIComponent(self.playerOptions[key])}`;
-                    });
+                        playerOptionsString += `${ key }=${ encodeURIComponent( self.playerOptions[ key ] ) }`;
+                    } );
 
                     // we need to create iframe manually because when we create it using API
                     // js events won't triggers after iframe moved to another place
-                    self.$video = document.createElement('iframe');
-                    self.$video.setAttribute('id', self.playerID);
-                    self.$video.setAttribute('src', `https://player.vimeo.com/video/${self.videoID}?${playerOptionsString}`);
-                    self.$video.setAttribute('frameborder', '0');
-                    self.$video.setAttribute('mozallowfullscreen', '');
-                    self.$video.setAttribute('allowfullscreen', '');
+                    self.$video = document.createElement( 'iframe' );
+                    self.$video.setAttribute( 'id', self.playerID );
+                    self.$video.setAttribute( 'src', `https://player.vimeo.com/video/${ self.videoID }?${ playerOptionsString }` );
+                    self.$video.setAttribute( 'frameborder', '0' );
+                    self.$video.setAttribute( 'mozallowfullscreen', '' );
+                    self.$video.setAttribute( 'allowfullscreen', '' );
 
-                    hiddenDiv.appendChild(self.$video);
-                    document.body.appendChild(hiddenDiv);
+                    hiddenDiv.appendChild( self.$video );
+                    document.body.appendChild( hiddenDiv );
                 }
-                self.player = self.player || new Vimeo.Player(self.$video, self.playerOptions);
+                self.player = self.player || new global.Vimeo.Player( self.$video, self.playerOptions );
 
                 // set current time for autoplay
-                if (self.options.startTime && self.options.autoplay) {
-                    self.player.setCurrentTime(self.options.startTime);
+                if ( self.options.startTime && self.options.autoplay ) {
+                    self.player.setCurrentTime( self.options.startTime );
                 }
 
                 // get video width and height
-                self.player.getVideoWidth().then((width) => {
+                self.player.getVideoWidth().then( ( width ) => {
                     self.videoWidth = width || 1280;
-                });
-                self.player.getVideoHeight().then((height) => {
+                } );
+                self.player.getVideoHeight().then( ( height ) => {
                     self.videoHeight = height || 720;
-                });
+                } );
 
                 // events
                 let vmStarted;
-                self.player.on('timeupdate', (e) => {
-                    if (!vmStarted) {
-                        self.fire('started', e);
+                self.player.on( 'timeupdate', ( e ) => {
+                    if ( ! vmStarted ) {
+                        self.fire( 'started', e );
                         vmStarted = 1;
                     }
 
-                    self.fire('timeupdate', e);
+                    self.fire( 'timeupdate', e );
 
                     // check for end of video and play again or stop
-                    if (self.options.endTime) {
-                        if (self.options.endTime && e.seconds >= self.options.endTime) {
-                            if (self.options.loop) {
-                                self.play(self.options.startTime);
+                    if ( self.options.endTime ) {
+                        if ( self.options.endTime && e.seconds >= self.options.endTime ) {
+                            if ( self.options.loop ) {
+                                self.play( self.options.startTime );
                             } else {
                                 self.pause();
                             }
                         }
                     }
-                });
-                self.player.on('play', (e) => {
-                    self.fire('play', e);
+                } );
+                self.player.on( 'play', ( e ) => {
+                    self.fire( 'play', e );
 
                     // check for the start time and start with it
-                    if (self.options.startTime && e.seconds === 0) {
-                        self.play(self.options.startTime);
+                    if ( self.options.startTime && 0 === e.seconds ) {
+                        self.play( self.options.startTime );
                     }
-                });
-                self.player.on('pause', (e) => {
-                    self.fire('pause', e);
-                });
-                self.player.on('ended', (e) => {
-                    self.fire('ended', e);
-                });
-                self.player.on('loaded', (e) => {
-                    self.fire('ready', e);
-                });
-                self.player.on('volumechange', (e) => {
-                    self.fire('volumechange', e);
-                });
-                self.player.on('error', (e) => {
-                    self.fire('error', e);
-                });
+                } );
+                self.player.on( 'pause', ( e ) => {
+                    self.fire( 'pause', e );
+                } );
+                self.player.on( 'ended', ( e ) => {
+                    self.fire( 'ended', e );
+                } );
+                self.player.on( 'loaded', ( e ) => {
+                    self.fire( 'ready', e );
+                } );
+                self.player.on( 'volumechange', ( e ) => {
+                    self.fire( 'volumechange', e );
+                } );
+                self.player.on( 'error', ( e ) => {
+                    self.fire( 'error', e );
+                } );
             }
 
             // Local
-            function addSourceToLocal(element, src, type) {
-                const source = document.createElement('source');
+            function addSourceToLocal( element, src, type ) {
+                const source = document.createElement( 'source' );
                 source.src = src;
                 source.type = type;
-                element.appendChild(source);
+                element.appendChild( source );
             }
-            if (self.type === 'local') {
-                if (!self.$video) {
-                    self.$video = document.createElement('video');
+            if ( 'local' === self.type ) {
+                if ( ! self.$video ) {
+                    self.$video = document.createElement( 'video' );
 
                     // show controls
-                    if (self.options.showContols) {
+                    if ( self.options.showContols ) {
                         self.$video.controls = true;
                     }
 
                     // mute
-                    if (self.options.mute) {
+                    if ( self.options.mute ) {
                         self.$video.muted = true;
-                    } else if (self.$video.volume) {
+                    } else if ( self.$video.volume ) {
                         self.$video.volume = self.options.volume / 100;
                     }
 
                     // loop
-                    if (self.options.loop) {
+                    if ( self.options.loop ) {
                         self.$video.loop = true;
                     }
 
                     // autoplay enable on mobile devices
-                    self.$video.setAttribute('playsinline', '');
-                    self.$video.setAttribute('webkit-playsinline', '');
+                    self.$video.setAttribute( 'playsinline', '' );
+                    self.$video.setAttribute( 'webkit-playsinline', '' );
 
-                    self.$video.setAttribute('id', self.playerID);
-                    hiddenDiv.appendChild(self.$video);
-                    document.body.appendChild(hiddenDiv);
+                    self.$video.setAttribute( 'id', self.playerID );
+                    hiddenDiv.appendChild( self.$video );
+                    document.body.appendChild( hiddenDiv );
 
-                    Object.keys(self.videoID).forEach((key) => {
-                        addSourceToLocal(self.$video, self.videoID[key], `video/${key}`);
-                    });
+                    Object.keys( self.videoID ).forEach( ( key ) => {
+                        addSourceToLocal( self.$video, self.videoID[ key ], `video/${ key }` );
+                    } );
                 }
 
                 self.player = self.player || self.$video;
 
                 let locStarted;
-                self.player.addEventListener('playing', (e) => {
-                    if (!locStarted) {
-                        self.fire('started', e);
+                self.player.addEventListener( 'playing', ( e ) => {
+                    if ( ! locStarted ) {
+                        self.fire( 'started', e );
                     }
                     locStarted = 1;
-                });
-                self.player.addEventListener('timeupdate', function (e) {
-                    self.fire('timeupdate', e);
+                } );
+                self.player.addEventListener( 'timeupdate', function( e ) {
+                    self.fire( 'timeupdate', e );
 
                     // check for end of video and play again or stop
-                    if (self.options.endTime) {
-                        if (self.options.endTime && this.currentTime >= self.options.endTime) {
-                            if (self.options.loop) {
-                                self.play(self.options.startTime);
+                    if ( self.options.endTime ) {
+                        if ( self.options.endTime && this.currentTime >= self.options.endTime ) {
+                            if ( self.options.loop ) {
+                                self.play( self.options.startTime );
                             } else {
                                 self.pause();
                             }
                         }
                     }
-                });
-                self.player.addEventListener('play', (e) => {
-                    self.fire('play', e);
-                });
-                self.player.addEventListener('pause', (e) => {
-                    self.fire('pause', e);
-                });
-                self.player.addEventListener('ended', (e) => {
-                    self.fire('ended', e);
-                });
-                self.player.addEventListener('loadedmetadata', function () {
+                } );
+                self.player.addEventListener( 'play', ( e ) => {
+                    self.fire( 'play', e );
+                } );
+                self.player.addEventListener( 'pause', ( e ) => {
+                    self.fire( 'pause', e );
+                } );
+                self.player.addEventListener( 'ended', ( e ) => {
+                    self.fire( 'ended', e );
+                } );
+                self.player.addEventListener( 'loadedmetadata', function() {
                     // get video width and height
                     self.videoWidth = this.videoWidth || 1280;
                     self.videoHeight = this.videoHeight || 720;
 
-                    self.fire('ready');
+                    self.fire( 'ready' );
 
                     // autoplay
-                    if (self.options.autoplay) {
-                        self.play(self.options.startTime);
+                    if ( self.options.autoplay ) {
+                        self.play( self.options.startTime );
                     }
-                });
-                self.player.addEventListener('volumechange', (e) => {
-                    self.getVolume((volume) => {
+                } );
+                self.player.addEventListener( 'volumechange', ( e ) => {
+                    self.getVolume( ( volume ) => {
                         self.options.volume = volume;
-                    });
-                    self.fire('volumechange', e);
-                });
-                self.player.addEventListener('error', (e) => {
-                    self.fire('error', e);
-                });
+                    } );
+                    self.fire( 'volumechange', e );
+                } );
+                self.player.addEventListener( 'error', ( e ) => {
+                    self.fire( 'error', e );
+                } );
             }
-            callback(self.$video);
-        });
+            callback( self.$video );
+        } );
     }
 
     init() {
         const self = this;
 
-        self.playerID = `VideoWorker-${self.ID}`;
+        self.playerID = `VideoWorker-${ self.ID }`;
     }
 
     loadAPI() {
         const self = this;
 
-        if (YoutubeAPIadded && VimeoAPIadded) {
+        if ( YoutubeAPIadded && VimeoAPIadded ) {
             return;
         }
 
         let src = '';
 
         // load Youtube API
-        if (self.type === 'youtube' && !YoutubeAPIadded) {
+        if ( 'youtube' === self.type && ! YoutubeAPIadded ) {
             YoutubeAPIadded = 1;
             src = 'https://www.youtube.com/iframe_api';
         }
 
         // load Vimeo API
-        if (self.type === 'vimeo' && !VimeoAPIadded) {
+        if ( 'vimeo' === self.type && ! VimeoAPIadded ) {
             VimeoAPIadded = 1;
 
             // Useful when Vimeo API added using RequireJS https://github.com/nk-o/video-worker/pull/7
-            if (typeof Vimeo !== 'undefined') {
+            if ( 'undefined' !== typeof global.Vimeo ) {
                 return;
             }
 
             src = 'https://player.vimeo.com/api/player.js';
         }
 
-        if (!src) {
+        if ( ! src ) {
             return;
         }
 
         // add script in head section
-        let tag = document.createElement('script');
-        let head = document.getElementsByTagName('head')[0];
+        let tag = document.createElement( 'script' );
+        let head = document.getElementsByTagName( 'head' )[ 0 ];
         tag.src = src;
 
-        head.appendChild(tag);
+        head.appendChild( tag );
 
         head = null;
         tag = null;
     }
 
-    onAPIready(callback) {
+    onAPIready( callback ) {
         const self = this;
 
         // Youtube
-        if (self.type === 'youtube') {
+        if ( 'youtube' === self.type ) {
             // Listen for global YT player callback
-            if ((typeof YT === 'undefined' || YT.loaded === 0) && !loadingYoutubePlayer) {
+            if ( ( 'undefined' === typeof global.YT || 0 === global.YT.loaded ) && ! loadingYoutubePlayer ) {
                 // Prevents Ready event from being called twice
                 loadingYoutubePlayer = 1;
 
                 // Creates deferred so, other players know when to wait.
-                window.onYouTubeIframeAPIReady = function () {
+                window.onYouTubeIframeAPIReady = function() {
                     window.onYouTubeIframeAPIReady = null;
-                    loadingYoutubeDefer.resolve('done');
+                    loadingYoutubeDefer.resolve( 'done' );
                     callback();
                 };
-            } else if (typeof YT === 'object' && YT.loaded === 1) {
+            } else if ( 'object' === typeof global.YT && 1 === global.YT.loaded ) {
                 callback();
             } else {
-                loadingYoutubeDefer.done(() => {
+                loadingYoutubeDefer.done( () => {
                     callback();
-                });
+                } );
             }
         }
 
         // Vimeo
-        if (self.type === 'vimeo') {
-            if (typeof Vimeo === 'undefined' && !loadingVimeoPlayer) {
+        if ( 'vimeo' === self.type ) {
+            if ( 'undefined' === typeof global.Vimeo && ! loadingVimeoPlayer ) {
                 loadingVimeoPlayer = 1;
-                const vimeoInterval = setInterval(() => {
-                    if (typeof Vimeo !== 'undefined') {
-                        clearInterval(vimeoInterval);
-                        loadingVimeoDefer.resolve('done');
+                const vimeoInterval = setInterval( () => {
+                    if ( 'undefined' !== typeof global.Vimeo ) {
+                        clearInterval( vimeoInterval );
+                        loadingVimeoDefer.resolve( 'done' );
                         callback();
                     }
-                }, 20);
-            } else if (typeof Vimeo !== 'undefined') {
+                }, 20 );
+            } else if ( 'undefined' !== typeof global.Vimeo ) {
                 callback();
             } else {
-                loadingVimeoDefer.done(() => {
+                loadingVimeoDefer.done( () => {
                     callback();
-                });
+                } );
             }
         }
 
         // Local
-        if (self.type === 'local') {
+        if ( 'local' === self.type ) {
             callback();
         }
     }
