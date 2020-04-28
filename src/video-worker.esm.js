@@ -72,7 +72,8 @@ export default class VideoWorker {
     }
 
     // Extend like jQuery.extend
-    static extend( ...args ) {
+    // eslint-disable-next-line class-methods-use-this
+    extend( ...args ) {
         const out = args[ 0 ] || {};
 
         Object.keys( args ).forEach( ( i ) => {
