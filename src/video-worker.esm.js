@@ -562,7 +562,6 @@ export default class VideoWorker {
                     self.playerOptions.background = 1;
                 }
 
-
                 if ( ! self.$video ) {
                     let playerOptionsString = '';
                     Object.keys( self.playerOptions ).forEach( ( key ) => {

@@ -1,18 +1,22 @@
-## Video Worker
+# Video Worker
+
 API wrapper for Youtube, Vimeo and Local videos
 
 ## Getting Started
 
 ### HTML
+
 ```html
 <!-- Video Worker -->
 <script src="video-worker/dist/video-worker.min.js"></script>
 ```
 
 ### Or use NPM
+
 npm: `npm install video-worker --save`
 
 ### Simple Example
+
 ```javascript
 import VideoWorker from 'video-worker';
 
@@ -22,7 +26,7 @@ if (videoObject.isValid()) {
     // retrieve iframe/video dom element.
     videoObject.getVideo((video) => {
         const $parent = video.parentNode;
-        
+
         // insert video in the body.
         document.body.appendChild(video);
 
@@ -33,13 +37,15 @@ if (videoObject.isValid()) {
 ```
 
 Video URLs examples:
+
 * YouTube `https://www.youtube.com/watch?v=ab0TSkLe-E0`
 * Vimeo `https://vimeo.com/110138539`
 * Local Hosted `mp4:./local-video.mp4,webm:./local-video.webm,ogv:./local-video.ogv`
 
-Note: for local hosted videos required only 1 video type, not necessary use all mp4, webm and ogv. This need only for maximum compatibility with all browsers.
+Note: for self-hosted videos required only 1 video type, not necessary use all mp4, webm and ogv. This need only for maximum compatibility with all browsers.
 
 ## Options
+
 Name | Type | Default | Description
 :--- | :--- | :------ | :----------
 autoplay | bool | `false` | Video autoplay.
@@ -51,6 +57,7 @@ startTime | float | `0` | Start time in seconds when video will be started (this
 endTime | float | `0` | End time in seconds when video will be ended.
 
 ### Example
+
 ```javascript
 new VideoWorker('<URL_TO_YOUR_VIDEO>', {
     autoplay: true,
@@ -59,8 +66,8 @@ new VideoWorker('<URL_TO_YOUR_VIDEO>', {
 });
 ```
 
-
 ## Events
+
 Name | Parameters | Description
 :--- | :----- | :----------
 ready | `event` | Fires only once, when the video is ready to play.
@@ -73,14 +80,15 @@ ended | `event` | Fires on video ended.
 error | `error` | Fires on video error
 
 ### Example
+
 ```javascript
 videoObject.on('ready', (event) => {
     console.log('video ready', event);
 });
 ```
 
-
 ## Methods
+
 Name | Result | Description
 :--- | :----- | :----------
 isValid | bool | Check if the video is successfully determined and ready to use.
@@ -95,6 +103,7 @@ getImageURL | string | Retrieves Youtube/Vimeo video poster image URL. `videoObj
 getVideo | dom | Retrieves iframe/video dom element. `videoObject.getVideo((video) => { ... })`
 
 ### Example
+
 ```javascript
 videoObject.mute();
 ```
@@ -102,11 +111,14 @@ videoObject.mute();
 ## For Developers
 
 ### Installation
+
 * Run `npm install` in the command line. Or if you need to update some dependencies, run `npm update`
 
 ### Building
+
 * `npm run build` to run build
 
 ### Linting
+
 * `npm run js-lint` to show eslint errors
 * `npm run js-lint-fix` to automatically fix some of the eslint errors
