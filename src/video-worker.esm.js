@@ -3,8 +3,8 @@ import global from 'global';
 // Deferred
 // thanks http://stackoverflow.com/questions/18096715/implement-deferred-object-without-using-jquery
 function Deferred() {
-    this.done = [];
-    this.fail = [];
+    this.doneCallbacks = [];
+    this.failCallbacks = [];
 }
 
 Deferred.prototype = {
@@ -18,16 +18,16 @@ Deferred.prototype = {
         }
     },
     resolve( ...args ) {
-        this.execute( this.done, args );
+        this.execute( this.doneCallbacks, args );
     },
     reject( ...args ) {
-        this.execute( this.fail, args );
+        this.execute( this.failCallbacks, args );
     },
     done( callback ) {
-        this.done.push( callback );
+        this.doneCallbacks.push( callback );
     },
     fail( callback ) {
-        this.fail.push( callback );
+        this.failCallbacks.push( callback );
     },
 };
 
