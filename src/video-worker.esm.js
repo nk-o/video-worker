@@ -425,14 +425,17 @@ export default class VideoWorker {
 
             // Youtube
             if ( 'youtube' === self.type ) {
-                self.playerOptions = {};
-                self.playerOptions.videoId = self.videoID;
-                self.playerOptions.playerVars = {
-                    autohide: 1,
-                    rel: 0,
-                    autoplay: 0,
-                    // autoplay enable on mobile devices
-                    playsinline: 1,
+                self.playerOptions = {
+                    // GDPR Compliance.
+                    host: 'https://www.youtube-nocookie.com',
+                    videoId: self.videoID,
+                    playerVars: {
+                        autohide: 1,
+                        rel: 0,
+                        autoplay: 0,
+                        // autoplay enable on mobile devices
+                        playsinline: 1,
+                    },
                 };
 
                 // hide controls
@@ -541,6 +544,8 @@ export default class VideoWorker {
             // Vimeo
             if ( 'vimeo' === self.type ) {
                 self.playerOptions = {
+                    // GDPR Compliance.
+                    dnt: 1,
                     id: self.videoID,
                     autopause: 0,
                     transparent: 0,
