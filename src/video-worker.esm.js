@@ -50,7 +50,7 @@ export default class VideoWorker {
             loop: false,
             mute: false,
             volume: 100,
-            showContols: true,
+            showControls: true,
 
             // start / end video time in seconds
             startTime: 0,
@@ -58,6 +58,13 @@ export default class VideoWorker {
         };
 
         self.options = self.extend( {}, self.options_default, options );
+
+        // Fix wrong option name.
+        // Thanks to https://github.com/nk-o/video-worker/issues/13.
+        if ( 'undefined' !== typeof self.options.showContols ) {
+            self.options.showControls = self.options.showContols;
+            delete self.options.showContols;
+        }
 
         // check URL
         self.videoID = self.parseURL( url );
@@ -439,7 +446,7 @@ export default class VideoWorker {
                 };
 
                 // hide controls
-                if ( ! self.options.showContols ) {
+                if ( ! self.options.showControls ) {
                     self.playerOptions.playerVars.iv_load_policy = 3;
                     self.playerOptions.playerVars.modestbranding = 1;
                     self.playerOptions.playerVars.controls = 0;
@@ -559,7 +566,7 @@ export default class VideoWorker {
                 }
 
                 // hide controls
-                if ( ! self.options.showContols ) {
+                if ( ! self.options.showControls ) {
                     self.playerOptions.badge = 0;
                     self.playerOptions.byline = 0;
                     self.playerOptions.portrait = 0;
@@ -661,7 +668,7 @@ export default class VideoWorker {
                     self.$video = document.createElement( 'video' );
 
                     // show controls
-                    if ( self.options.showContols ) {
+                    if ( self.options.showControls ) {
                         self.$video.controls = true;
                     }
 
