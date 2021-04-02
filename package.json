@@ -14,7 +14,7 @@
         "build": "gulp build",
         "js-lint": "eslint src/",
         "js-lint-fix": "eslint --fix src/",
-        "lint-staged": "lint-staged"
+        "postinstall": "npx simple-git-hooks"
     },
     "repository": {
         "type": "git",
@@ -45,10 +45,10 @@
         "gulp-sourcemaps": "^3.0.0",
         "gulp-uglify": "^3.0.2",
         "gulp-watch": "^5.0.1",
-        "husky": "^6.0.0",
         "json-file": "^0.1.0",
         "lint-staged": "^10.5.4",
         "micromatch": "^4.0.2",
+        "simple-git-hooks": "^2.3.0",
         "vinyl-named": "^1.1.0",
         "webpack-stream": "^6.1.2"
     },
