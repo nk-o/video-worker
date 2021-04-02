@@ -1,6 +1,6 @@
 /*!
  * Name    : Video Worker
- * Version : 1.1.10
+ * Version : 1.1.12
  * Author  : nK <https://nkdev.info>
  * GitHub  : https://github.com/nk-o/video-worker
  */
@@ -229,12 +229,19 @@ var VideoWorker = /*#__PURE__*/function () {
       loop: false,
       mute: false,
       volume: 100,
-      showContols: true,
+      showControls: true,
       // start / end video time in seconds
       startTime: 0,
       endTime: 0
     };
-    self.options = self.extend({}, self.options_default, options); // check URL
+    self.options = self.extend({}, self.options_default, options); // Fix wrong option name.
+    // Thanks to https://github.com/nk-o/video-worker/issues/13.
+
+    if ('undefined' !== typeof self.options.showContols) {
+      self.options.showControls = self.options.showContols;
+      delete self.options.showContols;
+    } // check URL
+
 
     self.videoID = self.parseURL(url); // init
 
@@ -649,7 +656,7 @@ var VideoWorker = /*#__PURE__*/function () {
             }
           }; // hide controls
 
-          if (!self.options.showContols) {
+          if (!self.options.showControls) {
             self.playerOptions.playerVars.iv_load_policy = 3;
             self.playerOptions.playerVars.modestbranding = 1;
             self.playerOptions.playerVars.controls = 0;
@@ -773,7 +780,7 @@ var VideoWorker = /*#__PURE__*/function () {
           } // hide controls
 
 
-          if (!self.options.showContols) {
+          if (!self.options.showControls) {
             self.playerOptions.badge = 0;
             self.playerOptions.byline = 0;
             self.playerOptions.portrait = 0;
@@ -871,7 +878,7 @@ var VideoWorker = /*#__PURE__*/function () {
           if (!self.$video) {
             self.$video = document.createElement('video'); // show controls
 
-            if (self.options.showContols) {
+            if (self.options.showControls) {
               self.$video.controls = true;
             } // mute
 
