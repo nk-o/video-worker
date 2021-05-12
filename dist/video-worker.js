@@ -1,6 +1,6 @@
 /*!
  * Name    : Video Worker
- * Version : 1.1.13
+ * Version : 1.1.14
  * Author  : nK <https://nkdev.info>
  * GitHub  : https://github.com/nk-o/video-worker
  */
