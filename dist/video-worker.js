@@ -1,6 +1,6 @@
 /*!
  * Name    : Video Worker
- * Version : 1.1.12
+ * Version : 1.1.13
  * Author  : nK <https://nkdev.info>
  * GitHub  : https://github.com/nk-o/video-worker
  */
@@ -230,6 +230,7 @@ var VideoWorker = /*#__PURE__*/function () {
       mute: false,
       volume: 100,
       showControls: true,
+      accessibilityHidden: false,
       // start / end video time in seconds
       startTime: 0,
       endTime: 0
@@ -755,7 +756,13 @@ var VideoWorker = /*#__PURE__*/function () {
           self.player = self.player || new global__WEBPACK_IMPORTED_MODULE_0___default.a.YT.Player(self.playerID, self.playerOptions);
 
           if (firstInit) {
-            self.$video = document.getElementById(self.playerID); // get video width and height
+            self.$video = document.getElementById(self.playerID); // add accessibility attributes
+
+            if (self.options.accessibilityHidden) {
+              self.$video.setAttribute('tabindex', '-1');
+              self.$video.setAttribute('aria-hidden', 'true');
+            } // get video width and height
+
 
             self.videoWidth = parseInt(self.$video.getAttribute('width'), 10) || 1280;
             self.videoHeight = parseInt(self.$video.getAttribute('height'), 10) || 720;
@@ -805,6 +812,13 @@ var VideoWorker = /*#__PURE__*/function () {
             self.$video.setAttribute('frameborder', '0');
             self.$video.setAttribute('mozallowfullscreen', '');
             self.$video.setAttribute('allowfullscreen', '');
+            self.$video.setAttribute('title', 'Vimeo video player'); // add accessibility attributes
+
+            if (self.options.accessibilityHidden) {
+              self.$video.setAttribute('tabindex', '-1');
+              self.$video.setAttribute('aria-hidden', 'true');
+            }
+
             hiddenDiv.appendChild(self.$video);
             document.body.appendChild(hiddenDiv);
           }
@@ -896,7 +910,13 @@ var VideoWorker = /*#__PURE__*/function () {
 
 
             self.$video.setAttribute('playsinline', '');
-            self.$video.setAttribute('webkit-playsinline', '');
+            self.$video.setAttribute('webkit-playsinline', ''); // add accessibility attributes
+
+            if (self.options.accessibilityHidden) {
+              self.$video.setAttribute('tabindex', '-1');
+              self.$video.setAttribute('aria-hidden', 'true');
+            }
+
             self.$video.setAttribute('id', self.playerID);
             hiddenDiv.appendChild(self.$video);
             document.body.appendChild(hiddenDiv);
