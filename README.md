@@ -51,6 +51,7 @@ Name | Type | Default | Description
 autoplay | bool | `false` | Video autoplay.
 loop | bool | `false` | Video playing loop.
 showControls | bool | `true` | Video controls.
+accessibilityHidden | bool | `false` | Add accessibility attributes for videos used on backgrounds.
 mute | bool | `false` | Mute sound.
 volume | int | `100` | Volume level from 0 to 100.
 startTime | float | `0` | Start time in seconds when video will be started (this value will be applied also after loop).
