@@ -14,7 +14,7 @@
         "build": "gulp build",
         "js-lint": "eslint src/",
         "js-lint-fix": "eslint --fix src/",
-        "postinstall": "npx simple-git-hooks"
+        "update-git-hooks": "npx simple-git-hooks"
     },
     "repository": {
         "type": "git",
