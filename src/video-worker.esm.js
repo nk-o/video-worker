@@ -51,6 +51,7 @@ export default class VideoWorker {
             mute: false,
             volume: 100,
             showControls: true,
+            accessibilityHidden: false,
 
             // start / end video time in seconds
             startTime: 0,
@@ -543,8 +544,10 @@ export default class VideoWorker {
                     self.$video = document.getElementById( self.playerID );
 
                     // add accessibility attributes
-                    self.$video.setAttribute( 'tabindex', '-1' );
-                    self.$video.setAttribute( 'aria-hidden', 'true' );
+                    if ( self.options.accessibilityHidden ) {
+                        self.$video.setAttribute( 'tabindex', '-1' );
+                        self.$video.setAttribute( 'aria-hidden', 'true' );
+                    }
 
                     // get video width and height
                     self.videoWidth = parseInt( self.$video.getAttribute( 'width' ), 10 ) || 1280;
@@ -595,11 +598,13 @@ export default class VideoWorker {
                     self.$video.setAttribute( 'frameborder', '0' );
                     self.$video.setAttribute( 'mozallowfullscreen', '' );
                     self.$video.setAttribute( 'allowfullscreen', '' );
+                    self.$video.setAttribute( 'title', 'Vimeo video player' );
 
                     // add accessibility attributes
-                    self.$video.setAttribute( 'tabindex', '-1' );
-                    self.$video.setAttribute( 'aria-hidden', 'true' );
-                    self.$video.setAttribute( 'title', 'Vimeo video player' );
+                    if ( self.options.accessibilityHidden ) {
+                        self.$video.setAttribute( 'tabindex', '-1' );
+                        self.$video.setAttribute( 'aria-hidden', 'true' );
+                    }
 
                     hiddenDiv.appendChild( self.$video );
                     document.body.appendChild( hiddenDiv );
@@ -698,8 +703,10 @@ export default class VideoWorker {
                     self.$video.setAttribute( 'webkit-playsinline', '' );
 
                     // add accessibility attributes
-                    self.$video.setAttribute( 'tabindex', '-1' );
-                    self.$video.setAttribute( 'aria-hidden', 'true' );
+                    if ( self.options.accessibilityHidden ) {
+                        self.$video.setAttribute( 'tabindex', '-1' );
+                        self.$video.setAttribute( 'aria-hidden', 'true' );
+                    }
 
                     self.$video.setAttribute( 'id', self.playerID );
                     hiddenDiv.appendChild( self.$video );
