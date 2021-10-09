@@ -31,10 +31,6 @@ Deferred.prototype = {
     },
 };
 
-const isIos = !! navigator.userAgent.match( /iP(ad|od|hone)/i );
-const safariVersion = navigator.userAgent.match( /Version\/(\d+).*Safari/ );
-const isSafari15 = safariVersion && safariVersion[ 1 ] && 15 <= parseFloat( safariVersion[ 1 ] );
-
 let ID = 0;
 let YoutubeAPIadded = 0;
 let VimeoAPIadded = 0;
@@ -757,18 +753,6 @@ export default class VideoWorker {
                     // get video width and height
                     self.videoWidth = this.videoWidth || 1280;
                     self.videoHeight = this.videoHeight || 720;
-
-                    // Hack to fix Safari 15 video rendering problem.
-                    // More info here - https://github.com/nk-o/jarallax/issues/200
-                    // And here - https://github.com/nk-crew/awb/issues/50
-                    if ( isIos || isSafari15 ) {
-                        const oldDisplay = self.$video.style.display;
-                        self.$video.style.display = 'none';
-
-                        setTimeout( () => {
-                            self.$video.style.display = oldDisplay;
-                        }, 0 );
-                    }
 
                     self.fire( 'ready' );
 
