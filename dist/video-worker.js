@@ -1,6 +1,6 @@
 /*!
  * Name    : Video Worker
- * Version : 1.1.16
+ * Version : 1.1.17
  * Author  : nK <https://nkdev.info>
  * GitHub  : https://github.com/nk-o/video-worker
  */
@@ -82,9 +82,6 @@ Deferred.prototype = {
     this.failCallbacks.push(callback);
   }
 };
-var isIos = !!navigator.userAgent.match(/iP(ad|od|hone)/i);
-var safariVersion = navigator.userAgent.match(/Version\/(\d+).*Safari/);
-var isSafari15 = safariVersion && safariVersion[1] && 15 <= parseFloat(safariVersion[1]);
 var ID = 0;
 var YoutubeAPIadded = 0;
 var VimeoAPIadded = 0;
@@ -834,18 +831,7 @@ var VideoWorker = /*#__PURE__*/function () {
           self.player.addEventListener('loadedmetadata', function () {
             // get video width and height
             self.videoWidth = this.videoWidth || 1280;
-            self.videoHeight = this.videoHeight || 720; // Hack to fix Safari 15 video rendering problem.
-            // More info here - https://github.com/nk-o/jarallax/issues/200
-            // And here - https://github.com/nk-crew/awb/issues/50
-
-            if (isIos || isSafari15) {
-              var oldDisplay = self.$video.style.display;
-              self.$video.style.display = 'none';
-              setTimeout(function () {
-                self.$video.style.display = oldDisplay;
-              }, 0);
-            }
-
+            self.videoHeight = this.videoHeight || 720;
             self.fire('ready'); // autoplay
 
             if (self.options.autoplay) {
