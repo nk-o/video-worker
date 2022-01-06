@@ -30,12 +30,12 @@
         "api"
     ],
     "devDependencies": {
-        "@babel/core": "^7.15.5",
-        "@babel/preset-env": "^7.15.6",
-        "@babel/register": "^7.15.3",
-        "babel-loader": "^8.2.2",
+        "@babel/core": "^7.16.7",
+        "@babel/preset-env": "^7.16.7",
+        "@babel/register": "^7.16.7",
+        "babel-loader": "^8.2.3",
         "del": "^6.0.0",
-        "eslint-config-nk": "^0.0.20",
+        "eslint-config-nk": "^1.0.8",
         "gulp": "^4.0.2",
         "gulp-header": "^2.0.9",
         "gulp-if": "^3.0.0",
@@ -47,10 +47,11 @@
         "gulp-watch": "^5.0.1",
         "husky": "^7.0.4",
         "json-file": "^0.1.0",
-        "lint-staged": "^11.2.0",
+        "lint-staged": "^12.1.5",
         "micromatch": "^4.0.4",
+        "prettier-config-nk": "^1.0.2",
         "vinyl-named": "^1.1.0",
-        "webpack": "^5.57.1",
+        "webpack": "^5.65.0",
         "webpack-stream": "^7.0.0"
     },
     "dependencies": {
