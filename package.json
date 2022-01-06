@@ -1,60 +1,59 @@
 {
-    "name": "video-worker",
-    "version": "1.1.17",
-    "description": "API wrapper for Youtube, Vimeo and Self-Hosted videos",
-    "license": "MIT",
-    "homepage": "https://github.com/nk-o/video-worker",
-    "author": "nK <https://nkdev.info>",
-    "main": "src/video-worker.esm.js",
-    "files": [
-        "src",
-        "dist"
-    ],
-    "scripts": {
-        "build": "gulp build",
-        "js-lint": "eslint src/",
-        "js-lint-fix": "eslint --fix src/",
-        "prepare": "husky install"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/nk-o/video-worker.git"
-    },
-    "bugs": {
-        "url": "https://github.com/nk-o/video-worker/issues"
-    },
-    "keywords": [
-        "video",
-        "youtube",
-        "vimeo",
-        "api"
-    ],
-    "devDependencies": {
-        "@babel/core": "^7.16.7",
-        "@babel/preset-env": "^7.16.7",
-        "@babel/register": "^7.16.7",
-        "babel-loader": "^8.2.3",
-        "del": "^6.0.0",
-        "eslint-config-nk": "^1.0.8",
-        "gulp": "^4.0.2",
-        "gulp-header": "^2.0.9",
-        "gulp-if": "^3.0.0",
-        "gulp-load-plugins": "^2.0.7",
-        "gulp-plumber": "^1.2.1",
-        "gulp-rename": "^2.0.0",
-        "gulp-sourcemaps": "^3.0.0",
-        "gulp-uglify": "^3.0.2",
-        "gulp-watch": "^5.0.1",
-        "husky": "^7.0.4",
-        "json-file": "^0.1.0",
-        "lint-staged": "^12.1.5",
-        "micromatch": "^4.0.4",
-        "prettier-config-nk": "^1.0.2",
-        "vinyl-named": "^1.1.0",
-        "webpack": "^5.65.0",
-        "webpack-stream": "^7.0.0"
-    },
-    "dependencies": {
-        "global": "^4.4.0"
-    }
+  "name": "video-worker",
+  "version": "1.1.17",
+  "description": "API wrapper for Youtube, Vimeo and Self-Hosted videos",
+  "license": "MIT",
+  "homepage": "https://github.com/nk-o/video-worker",
+  "author": "nK <https://nkdev.info>",
+  "main": "src/video-worker.esm.js",
+  "files": [
+    "src",
+    "dist"
+  ],
+  "scripts": {
+    "build": "gulp build",
+    "js-lint": "eslint src/",
+    "js-lint-fix": "eslint --fix src/",
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nk-o/video-worker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nk-o/video-worker/issues"
+  },
+  "keywords": [
+    "video",
+    "youtube",
+    "vimeo",
+    "api"
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.16.7",
+    "@babel/preset-env": "^7.16.7",
+    "@babel/register": "^7.16.7",
+    "babel-loader": "^8.2.3",
+    "del": "^6.0.0",
+    "eslint-config-nk": "^1.0.8",
+    "gulp": "^4.0.2",
+    "gulp-header": "^2.0.9",
+    "gulp-if": "^3.0.0",
+    "gulp-load-plugins": "^2.0.7",
+    "gulp-plumber": "^1.2.1",
+    "gulp-rename": "^2.0.0",
+    "gulp-sourcemaps": "^3.0.0",
+    "gulp-uglify": "^3.0.2",
+    "husky": "^7.0.4",
+    "json-file": "^0.1.0",
+    "lint-staged": "^12.1.5",
+    "micromatch": "^4.0.4",
+    "prettier-config-nk": "^1.0.2",
+    "vinyl-named": "^1.1.0",
+    "webpack": "^5.65.0",
+    "webpack-stream": "^7.0.0"
+  },
+  "dependencies": {
+    "global": "^4.4.0"
+  }
 }
