@@ -23,16 +23,16 @@ import VideoWorker from 'video-worker';
 const videoObject = new VideoWorker('https://www.youtube.com/watch?v=ab0TSkLe-E0');
 
 if (videoObject.isValid()) {
-    // retrieve iframe/video dom element.
-    videoObject.getVideo((video) => {
-        const $parent = video.parentNode;
+  // retrieve iframe/video dom element.
+  videoObject.getVideo((video) => {
+    const $parent = video.parentNode;
 
-        // insert video in the body.
-        document.body.appendChild(video);
+    // insert video in the body.
+    document.body.appendChild(video);
 
-        // remove temporary parent video element (created by VideoWorker).
-        $parent.parentNode.removeChild($parent);
-    });
+    // remove temporary parent video element (created by VideoWorker).
+    $parent.parentNode.removeChild($parent);
+  });
 }
 ```
 
@@ -61,9 +61,9 @@ endTime | float | `0` | End time in seconds when video will be ended.
 
 ```javascript
 new VideoWorker('<URL_TO_YOUR_VIDEO>', {
-    autoplay: true,
-    loop: true,
-    startTime: 10,
+  autoplay: true,
+  loop: true,
+  startTime: 10,
 });
 ```
 
@@ -84,7 +84,7 @@ error | `error` | Fires on video error
 
 ```javascript
 videoObject.on('ready', (event) => {
-    console.log('video ready', event);
+  console.log('video ready', event);
 });
 ```
 
