@@ -388,14 +388,18 @@ export default class VideoWorker {
 
     if (self.type === 'vimeo') {
       let request = new XMLHttpRequest();
-      request.open('GET', `https://vimeo.com/api/v2/video/${self.videoID}.json`, true);
+      // https://vimeo.com/api/oembed.json?url=https://vimeo.com/235212527
+      request.open('GET', `https://vimeo.com/api/oembed.json?url=${self.url}`, true);
       request.onreadystatechange = function () {
         if (this.readyState === 4) {
           if (this.status >= 200 && this.status < 400) {
             // Success!
             const response = JSON.parse(this.responseText);
-            self.videoImage = response[0].thumbnail_large;
-            callback(self.videoImage);
+
+            if (response.thumbnail_url) {
+              self.videoImage = response.thumbnail_url;
+              callback(self.videoImage);
+            }
           } else {
             // Error :(
           }
