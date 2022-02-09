@@ -4,6 +4,17 @@ import { babel } from '@rollup/plugin-babel';
 import replace from '@rollup/plugin-replace';
 import { terser } from 'rollup-plugin-terser';
 import browsersync from 'rollup-plugin-browsersync';
+const { data } = require('json-file').read('./package.json');
+
+function getHeader() {
+  return `/*!
+ * Name    : Video Worker
+ * Version : ${data.version}
+ * Author  : ${data.author}
+ * GitHub  : ${data.homepage}
+ */
+`;
+}
 
 const input = path.join(__dirname, 'src/video-worker.js');
 
@@ -11,6 +22,7 @@ const bundles = [
   {
     input,
     output: {
+      banner: getHeader(),
       file: path.join(__dirname, 'dist/video-worker.esm.js'),
       format: 'esm',
     },
@@ -18,6 +30,7 @@ const bundles = [
   {
     input,
     output: {
+      banner: getHeader(),
       file: path.join(__dirname, 'dist/video-worker.esm.min.js'),
       format: 'esm',
     },
@@ -25,6 +38,7 @@ const bundles = [
   {
     input,
     output: {
+      banner: getHeader(),
       name: 'VideoWorker',
       file: path.join(__dirname, 'dist/video-worker.js'),
       format: 'umd',
@@ -33,6 +47,7 @@ const bundles = [
   {
     input,
     output: {
+      banner: getHeader(),
       name: 'VideoWorker',
       file: path.join(__dirname, 'dist/video-worker.min.js'),
       format: 'umd',
@@ -41,6 +56,7 @@ const bundles = [
   {
     input,
     output: {
+      banner: getHeader(),
       file: path.join(__dirname, 'dist/video-worker.cjs'),
       format: 'cjs',
       exports: 'default',
