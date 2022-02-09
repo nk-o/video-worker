@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test</title>
+  </head>
+  <body>
+    <script type="module">
+      import VideoWorker from "../dist/video-worker.esm.min.js";
+
+      const videoObject = new VideoWorker("https://www.youtube.com/watch?v=ab0TSkLe-E0");
+
+      if (videoObject.isValid()) {
+        console.log("Video URL is valid");
+
+        // retrieve iframe/video dom element.
+        videoObject.getVideo((video) => {
+          console.log("Video iFrame", video);
+        });
+
+        // retrieve video thumbnail url.
+        videoObject.getImageURL((url) => {
+          console.log("Video thumbnail", url);
+        });
+      }
+    </script>
+
+    <nav>
+      <a href="esm.html">ESM</a>
+      <a href="umd.html">UMD</a>
+    </nav>
+    <h1>Test VideoWorker calls as ESM.</h1>
+    <p>Check browser console for output.</p>
+  </body>
+</html>
