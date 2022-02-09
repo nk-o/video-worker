@@ -1,3 +1,10 @@
+/*!
+ * Name    : Video Worker
+ * Version : 2.0.0
+ * Author  : nK <https://nkdev.info>
+ * GitHub  : https://github.com/nk-o/video-worker
+ */
+
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
@@ -855,8 +862,8 @@
           // Prevents Ready event from being called twice
           loadingYoutubePlayer = 1; // Creates deferred so, other players know when to wait.
 
-          window.onYouTubeIframeAPIReady = function () {
-            window.onYouTubeIframeAPIReady = null;
+          global$1.onYouTubeIframeAPIReady = function () {
+            global$1.onYouTubeIframeAPIReady = null;
             loadingYoutubeDefer.resolve('done');
             callback();
           };

@@ -1,3 +1,10 @@
+/*!
+ * Name    : Video Worker
+ * Version : 2.0.0
+ * Author  : nK <https://nkdev.info>
+ * GitHub  : https://github.com/nk-o/video-worker
+ */
+
 /* eslint-disable import/no-mutable-exports */
 
 /* eslint-disable no-restricted-globals */
@@ -849,8 +856,8 @@ class VideoWorker {
         // Prevents Ready event from being called twice
         loadingYoutubePlayer = 1; // Creates deferred so, other players know when to wait.
 
-        window.onYouTubeIframeAPIReady = function () {
-          window.onYouTubeIframeAPIReady = null;
+        global$1.onYouTubeIframeAPIReady = function () {
+          global$1.onYouTubeIframeAPIReady = null;
           loadingYoutubeDefer.resolve('done');
           callback();
         };
