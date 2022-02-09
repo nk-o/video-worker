@@ -7,12 +7,13 @@ import browsersync from 'rollup-plugin-browsersync';
 
 const { data } = require('json-file').read('./package.json');
 
+const year = new Date().getFullYear();
+
 function getHeader() {
   return `/*!
- * Name    : Video Worker
- * Version : ${data.version}
- * Author  : ${data.author}
- * GitHub  : ${data.homepage}
+ * Video Worker v${data.version} (${data.homepage})
+ * Copyright ${year} ${data.author}
+ * Licensed under MIT (https://github.com/nk-o/video-worker/blob/master/LICENSE)
  */
 `;
 }
