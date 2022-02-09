@@ -2,7 +2,9 @@
 
 API wrapper for Youtube, Vimeo and Local videos
 
-## Getting Started
+## Import VideoWorker
+
+Use one of the following examples to import script.
 
 ### ESM
 
@@ -11,8 +13,14 @@ We provide a version of VideoWorker built as ESM (video-worker.esm.js and video-
 ```html
 <script type="module">
   import VideoWorker from "video-worker.esm.min.js";
+</script>
+```
 
-  const videoObject = new VideoWorker("https://www.youtube.com/watch?v=ab0TSkLe-E0");
+### ESM + [Skypack](https://www.skypack.dev/)
+
+```html
+<script type="module">
+  import VideoWorker from "https://cdn.skypack.dev/video-worker@2.0?min";
 </script>
 ```
 
@@ -22,13 +30,16 @@ VideoWorker may be also used in a traditional way by including script in HTML an
 
 ```html
 <script src="video-worker.min.js"></script>
-
-<script>
-  const videoObject = new VideoWorker("https://www.youtube.com/watch?v=ab0TSkLe-E0");
-</script>
 ```
 
-### Webpack
+
+### UMD + [UNPKG](https://unpkg.com/)
+
+```html
+<script src="https://unpkg.com/video-worker@2.0"></script>
+```
+
+### CJS (Bundlers like Webpack)
 
 Install VideoWorker as a Node.js module using npm
 
@@ -40,11 +51,9 @@ Import VideoWorker by adding this line to your app's entry point (usually `index
 
 ```javascript
 import VideoWorker from 'video-worker';
-
-const videoObject = new VideoWorker('https://www.youtube.com/watch?v=ab0TSkLe-E0');
 ```
 
-## Simple usage example
+## Use VideoWorker
 
 ```javascript
 import VideoWorker from 'video-worker';
