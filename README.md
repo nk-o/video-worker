@@ -8,9 +8,9 @@ API wrapper for Youtube, Vimeo and Local videos
 
 - [Import VideoWorker](#import-videoworker)
   - [ESM](#esm)
-  - [ESM + Skypack](#esm--skypack)
+  - [ESM CDN](#esm-cdn)
   - [UMD](#umd)
-  - [UMD + UNPKG](#umd--unpkg)
+  - [UMD CDN](#umd-cdn)
   - [CJS (Bundlers like Webpack)](#cjs-bundlers-like-webpack)
 - [Use VideoWorker](#use-videoworker)
 - [Options](#options)
@@ -32,11 +32,11 @@ We provide a version of VideoWorker built as ESM (video-worker.esm.js and video-
 </script>
 ```
 
-### ESM + [Skypack](https://www.skypack.dev/)
+### ESM CDN
 
 ```html
 <script type="module">
-  import VideoWorker from "https://cdn.skypack.dev/video-worker@2.0?min";
+  import VideoWorker from "https://cdn.jsdelivr.net/npm/video-worker@2/+esm";
 </script>
 ```
 
@@ -49,10 +49,10 @@ VideoWorker may be also used in a traditional way by including script in HTML an
 ```
 
 
-### UMD + [UNPKG](https://unpkg.com/)
+### UMD CDN
 
 ```html
-<script src="https://unpkg.com/video-worker@2.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/video-worker@2/dist/video-worker.min.js"></script>
 ```
 
 ### CJS (Bundlers like Webpack)
