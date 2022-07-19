@@ -1,6 +1,22 @@
-# Video Worker
+# Video Worker <!-- omit in toc -->
+
+![video-worker.min.js](https://img.badgesize.io/nk-o/video-worker/master/dist/video-worker.min.js?compression=gzip)
 
 API wrapper for Youtube, Vimeo and Local videos
+
+## Table of Contents <!-- omit in toc -->
+
+- [Import VideoWorker](#import-videoworker)
+  - [ESM](#esm)
+  - [ESM + Skypack](#esm--skypack)
+  - [UMD](#umd)
+  - [UMD + UNPKG](#umd--unpkg)
+  - [CJS (Bundlers like Webpack)](#cjs-bundlers-like-webpack)
+- [Use VideoWorker](#use-videoworker)
+- [Options](#options)
+- [Events](#events)
+- [Methods](#methods)
+- [For Developers](#for-developers)
 
 ## Import VideoWorker
 
@@ -95,7 +111,7 @@ volume | int | `100` | Volume level from 0 to 100.
 startTime | float | `0` | Start time in seconds when video will be started (this value will be applied also after loop).
 endTime | float | `0` | End time in seconds when video will be ended.
 
-### Example
+### Example <!-- omit in toc -->
 
 ```javascript
 new VideoWorker('<URL_TO_YOUR_VIDEO>', {
@@ -118,7 +134,7 @@ pause | `event` | Fires on video paused.
 ended | `event` | Fires on video ended.
 error | `error` | Fires on video error
 
-### Example
+### Example <!-- omit in toc -->
 
 ```javascript
 videoObject.on('ready', (event) => {
@@ -141,7 +157,7 @@ getVolume | int | Get volume level. `videoObject.getVolume((volume) => { ... })`
 getImageURL | string | Retrieves Youtube/Vimeo video poster image URL. `videoObject.getImageURL((url) => { ... })`
 getVideo | dom | Retrieves iframe/video dom element. `videoObject.getVideo((video) => { ... })`
 
-### Example
+### Example <!-- omit in toc -->
 
 ```javascript
 videoObject.mute();
@@ -149,15 +165,15 @@ videoObject.mute();
 
 ## For Developers
 
-### Installation
+### Installation <!-- omit in toc -->
 
 * Run `npm install` in the command line. Or if you need to update some dependencies, run `npm update`
 
-### Building
+### Building <!-- omit in toc -->
 
 * `npm run build` to run build
 
-### Linting
+### Linting <!-- omit in toc -->
 
 * `npm run js-lint` to show eslint errors
 * `npm run js-lint-fix` to automatically fix some of the eslint errors
