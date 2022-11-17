@@ -356,9 +356,16 @@ class VideoWorker {
     }
 
     if (self.type === 'vimeo') {
+      // We should provide width to get HQ thumbnail URL.
+      let width = global.innerWidth || 1920;
+      if ( global.devicePixelRatio ) {
+        width = width * global.devicePixelRatio;
+      }
+      width = Math.min(width, 1920);
+
       let request = new XMLHttpRequest();
       // https://vimeo.com/api/oembed.json?url=https://vimeo.com/235212527
-      request.open('GET', `https://vimeo.com/api/oembed.json?url=${self.url}`, true);
+      request.open('GET', `https://vimeo.com/api/oembed.json?url=${self.url}&width=${width}`, true);
       request.onreadystatechange = function () {
         if (this.readyState === 4) {
           if (this.status >= 200 && this.status < 400) {
