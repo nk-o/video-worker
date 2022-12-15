@@ -2,7 +2,7 @@
 
 ![video-worker.min.js](https://img.badgesize.io/nk-o/video-worker/master/dist/video-worker.min.js?compression=gzip)
 
-API wrapper for Youtube, Vimeo and Local videos
+API wrapper for Youtube, Vimeo and Self-Hosted videos
 
 ## Table of Contents <!-- omit in toc -->
 
@@ -94,7 +94,7 @@ Video URLs examples:
 
 * YouTube `https://www.youtube.com/watch?v=ab0TSkLe-E0`
 * Vimeo `https://vimeo.com/110138539`
-* Local Hosted `mp4:./local-video.mp4,webm:./local-video.webm,ogv:./local-video.ogv`
+* Self Hosted `mp4:./self-hosted-video.mp4,webm:./self-hosted-video.webm,ogv:./self-hosted-video.ogv`
 
 Note: for self-hosted videos required only 1 video type, not necessary use all mp4, webm and ogv. This need only for maximum compatibility with all browsers.
 
