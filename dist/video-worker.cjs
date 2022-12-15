@@ -1,5 +1,5 @@
 /*!
- * Video Worker v2.1.0 (https://github.com/nk-o/video-worker)
+ * Video Worker v2.1.1 (https://github.com/nk-o/video-worker)
  * Copyright 2022 nK <https://nkdev.info>
  * Licensed under MIT (https://github.com/nk-o/video-worker/blob/master/LICENSE)
  */
@@ -266,7 +266,8 @@ class VideoWorker {
       self.player.unMute();
     }
     if (self.type === 'vimeo' && self.player.setVolume) {
-      self.player.setVolume(self.options.volume);
+      // In case the default volume is 0, we have to set 100 when unmute.
+      self.player.setVolume(self.options.volume || 100);
     }
     if (self.type === 'local') {
       self.$video.muted = false;
@@ -281,7 +282,7 @@ class VideoWorker {
       self.player.setVolume(volume);
     }
     if (self.type === 'vimeo' && self.player.setVolume) {
-      self.player.setVolume(volume);
+      self.player.setVolume(volume / 100);
     }
     if (self.type === 'local') {
       self.$video.volume = volume / 100;
@@ -298,7 +299,7 @@ class VideoWorker {
     }
     if (self.type === 'vimeo' && self.player.getVolume) {
       self.player.getVolume().then(volume => {
-        callback(volume);
+        callback(volume * 100);
       });
     }
     if (self.type === 'local') {
@@ -531,7 +532,7 @@ class VideoWorker {
           muted: self.options.mute ? 1 : 0
         };
         if (self.options.volume) {
-          self.playerOptions.volume = self.options.volume;
+          self.playerOptions.volume = self.options.volume / 100;
         }
 
         // hide controls

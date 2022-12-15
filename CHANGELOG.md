@@ -1,9 +1,11 @@
 # Changelog
 
-## [2.1.0] - Dec 15, 2022
+## [2.1.1] - Dec 15, 2022
 
 - added Vimeo high quality thumbnail support
 - added support for Youtube Shorts URLs
+- fixed volume value for Vimeo player (used range from 0 to 1)
+- fixed Vimeo unmute when initial volume is 0
 
 ## [2.0.0] - Feb 9, 2022
 
