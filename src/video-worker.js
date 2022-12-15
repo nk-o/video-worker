@@ -275,7 +275,7 @@ class VideoWorker {
     }
 
     if (self.type === 'vimeo' && self.player.setVolume) {
-      self.player.setVolume(volume);
+      self.player.setVolume(volume / 100);
     }
 
     if (self.type === 'local') {
@@ -296,7 +296,7 @@ class VideoWorker {
 
     if (self.type === 'vimeo' && self.player.getVolume) {
       self.player.getVolume().then((volume) => {
-        callback(volume);
+        callback(volume * 100);
       });
     }
 
@@ -546,7 +546,7 @@ class VideoWorker {
         };
 
         if (self.options.volume) {
-          self.playerOptions.volume = self.options.volume;
+          self.playerOptions.volume = self.options.volume / 100;
         }
 
         // hide controls
