@@ -1,5 +1,5 @@
 /*!
- * Video Worker v2.0.0 (https://github.com/nk-o/video-worker)
+ * Video Worker v2.1.0 (https://github.com/nk-o/video-worker)
  * Copyright 2022 nK <https://nkdev.info>
  * Licensed under MIT (https://github.com/nk-o/video-worker/blob/master/LICENSE)
  */
@@ -115,7 +115,7 @@
       // parse youtube ID
       function getYoutubeID(ytUrl) {
         // eslint-disable-next-line no-useless-escape
-        const regExp = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/;
+        const regExp = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=)([^#\&\?]*).*/;
         const match = ytUrl.match(regExp);
         return match && match[1].length === 11 ? match[1] : false;
       }
