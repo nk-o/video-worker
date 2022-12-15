@@ -256,7 +256,8 @@ class VideoWorker {
     }
 
     if (self.type === 'vimeo' && self.player.setVolume) {
-      self.player.setVolume(self.options.volume);
+      // In case the default volume is 0, we have to set 100 when unmute.
+      self.player.setVolume(self.options.volume || 100);
     }
 
     if (self.type === 'local') {
