@@ -358,8 +358,8 @@ class VideoWorker {
     if (self.type === 'vimeo') {
       // We should provide width to get HQ thumbnail URL.
       let width = global.innerWidth || 1920;
-      if ( global.devicePixelRatio ) {
-        width = width * global.devicePixelRatio;
+      if (global.devicePixelRatio) {
+        width *= global.devicePixelRatio;
       }
       width = Math.min(width, 1920);
 

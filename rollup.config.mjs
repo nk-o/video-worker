@@ -1,11 +1,16 @@
-import path from 'path';
-
+/* eslint-disable import/no-extraneous-dependencies */
 import { babel } from '@rollup/plugin-babel';
 import replace from '@rollup/plugin-replace';
-import { terser } from 'rollup-plugin-terser';
-import browsersync from 'rollup-plugin-browsersync';
+import terser from '@rollup/plugin-terser';
+import serve from 'rollup-plugin-serve';
 
-const { data } = require('json-file').read('./package.json');
+// TODO: Wait once this issue will be fixed before update the terser plugin https://github.com/rollup/plugins/issues/1371
+// TODO: Remove this hack once this issue will be resolved https://github.com/rollup/plugins/issues/1366
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+global['__filename'] = __filename;
+
+import data from './package.json' assert { type: 'json' };
 
 const year = new Date().getFullYear();
 
@@ -18,14 +23,14 @@ function getHeader() {
 `;
 }
 
-const input = path.join(__dirname, 'src/video-worker.js');
+const input = './src/video-worker.js';
 
 const bundles = [
   {
     input,
     output: {
       banner: getHeader(),
-      file: path.join(__dirname, 'dist/video-worker.esm.js'),
+      file: './dist/video-worker.esm.js',
       format: 'esm',
     },
   },
@@ -33,8 +38,9 @@ const bundles = [
     input,
     output: {
       banner: getHeader(),
-      file: path.join(__dirname, 'dist/video-worker.esm.min.js'),
+      file: './dist/video-worker.esm.min.js',
       format: 'esm',
+      compact: true,
     },
   },
   {
@@ -42,7 +48,7 @@ const bundles = [
     output: {
       banner: getHeader(),
       name: 'VideoWorker',
-      file: path.join(__dirname, 'dist/video-worker.js'),
+      file: './dist/video-worker.js',
       format: 'umd',
     },
   },
@@ -51,17 +57,28 @@ const bundles = [
     output: {
       banner: getHeader(),
       name: 'VideoWorker',
-      file: path.join(__dirname, 'dist/video-worker.min.js'),
+      file: './dist/video-worker.min.js',
       format: 'umd',
+      compact: true,
     },
   },
   {
     input,
     output: {
       banner: getHeader(),
-      file: path.join(__dirname, 'dist/video-worker.cjs'),
+      file: './dist/video-worker.cjs',
       format: 'cjs',
       exports: 'default',
+    },
+  },
+  {
+    input,
+    output: {
+      banner: getHeader(),
+      file: './dist/video-worker.cjs',
+      format: 'cjs',
+      exports: 'default',
+      compact: true,
     },
   },
 ];
@@ -93,10 +110,10 @@ const configs = bundles.map(({ input: inputPath, output }) => ({
 // Dev server.
 if (isDev()) {
   configs[configs.length - 1].plugins.push(
-    browsersync({
-      server: {
-        baseDir: ['demo', './'],
-      },
+    serve({
+      open: true,
+      contentBase: ['demo', './'],
+      port: 3002,
     })
   );
 }
