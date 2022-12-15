@@ -1,5 +1,5 @@
 /*!
- * Video Worker v2.1.1 (https://github.com/nk-o/video-worker)
+ * Video Worker v2.1.2 (https://github.com/nk-o/video-worker)
  * Copyright 2022 nK <https://nkdev.info>
  * Licensed under MIT (https://github.com/nk-o/video-worker/blob/master/LICENSE)
  */
@@ -251,7 +251,7 @@ class VideoWorker {
       self.player.mute();
     }
     if (self.type === 'vimeo' && self.player.setVolume) {
-      self.player.setVolume(0);
+      self.setVolume(0);
     }
     if (self.type === 'local') {
       self.$video.muted = true;
@@ -267,7 +267,7 @@ class VideoWorker {
     }
     if (self.type === 'vimeo' && self.player.setVolume) {
       // In case the default volume is 0, we have to set 100 when unmute.
-      self.player.setVolume(self.options.volume || 100);
+      self.setVolume(self.options.volume || 100);
     }
     if (self.type === 'local') {
       self.$video.muted = false;

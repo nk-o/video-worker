@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.1.1] - Dec 15, 2022
+## [2.1.2] - Dec 15, 2022
 
 - added Vimeo high quality thumbnail support
 - added support for Youtube Shorts URLs
