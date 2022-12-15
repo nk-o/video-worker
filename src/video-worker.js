@@ -70,7 +70,7 @@ class VideoWorker {
     // parse youtube ID
     function getYoutubeID(ytUrl) {
       // eslint-disable-next-line no-useless-escape
-      const regExp = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/;
+      const regExp = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=)([^#\&\?]*).*/;
       const match = ytUrl.match(regExp);
       return match && match[1].length === 11 ? match[1] : false;
     }
