@@ -21,13 +21,6 @@ class VideoWorker {
 
     self.options = extend({}, self.options_default, options);
 
-    // Fix wrong option name.
-    // Thanks to https://github.com/nk-o/video-worker/issues/13.
-    if (typeof self.options.showContols !== 'undefined') {
-      self.options.showControls = self.options.showContols;
-      delete self.options.showContols;
-    }
-
     // check URL
     self.videoID = self.parseURL(url);
 
