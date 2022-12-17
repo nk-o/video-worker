@@ -1,5 +1,5 @@
 /*!
- * Video Worker v2.1.4 (https://github.com/nk-o/video-worker)
+ * Video Worker v2.1.5 (https://github.com/nk-o/video-worker)
  * Copyright 2022 nK <https://nkdev.info>
  * Licensed under MIT (https://github.com/nk-o/video-worker/blob/master/LICENSE)
  */
@@ -645,6 +645,7 @@ class VideoWorker {
       if (self.type === 'local') {
         if (!self.$video) {
           self.$video = document.createElement('video');
+          self.player = self.$video;
 
           // show controls
           if (self.options.showControls) {
@@ -682,7 +683,6 @@ class VideoWorker {
             addSourceToLocal(self.$video, self.videoID[key], `video/${key}`);
           });
         }
-        self.player = self.player || self.$video;
         let locStarted;
         self.player.addEventListener('playing', e => {
           if (!locStarted) {
