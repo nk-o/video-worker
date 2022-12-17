@@ -1,5 +1,7 @@
 import global from './utils/global';
 import Deferred from './utils/deferred';
+import defaults from './defaults';
+import extend from './utils/extend';
 
 let ID = 0;
 let YoutubeAPIadded = 0;
@@ -15,20 +17,9 @@ class VideoWorker {
 
     self.url = url;
 
-    self.options_default = {
-      autoplay: false,
-      loop: false,
-      mute: false,
-      volume: 100,
-      showControls: true,
-      accessibilityHidden: false,
+    self.options_default = { ...defaults };
 
-      // start / end video time in seconds
-      startTime: 0,
-      endTime: 0,
-    };
-
-    self.options = self.extend({}, self.options_default, options);
+    self.options = extend({}, self.options_default, options);
 
     // Fix wrong option name.
     // Thanks to https://github.com/nk-o/video-worker/issues/13.
@@ -47,23 +38,6 @@ class VideoWorker {
       self.loadAPI();
       self.init();
     }
-  }
-
-  // Extend like jQuery.extend
-  // eslint-disable-next-line class-methods-use-this
-  extend(...args) {
-    const out = args[0] || {};
-
-    Object.keys(args).forEach((i) => {
-      if (!args[i]) {
-        return;
-      }
-      Object.keys(args[i]).forEach((key) => {
-        out[key] = args[i][key];
-      });
-    });
-
-    return out;
   }
 
   parseURL(url) {
