@@ -267,7 +267,7 @@ class VideoWorker {
 
   setVolume(volume = false) {
     const self = this;
-    if (!self.player || !volume) {
+    if (!self.player || typeof volume !== 'number') {
       return;
     }
 
@@ -441,7 +441,7 @@ class VideoWorker {
             // mute
             if (self.options.mute) {
               e.target.mute();
-            } else if (self.options.volume) {
+            } else if (typeof self.options.volume === 'number') {
               e.target.setVolume(self.options.volume);
             }
 
@@ -543,19 +543,16 @@ class VideoWorker {
           transparent: 0,
           autoplay: self.options.autoplay ? 1 : 0,
           loop: self.options.loop ? 1 : 0,
-          muted: self.options.mute ? 1 : 0,
+          muted: self.options.mute || self.options.volume === 0 ? 1 : 0,
         };
-
-        if (self.options.volume) {
-          self.playerOptions.volume = self.options.volume / 100;
-        }
 
         // hide controls
         if (!self.options.showControls) {
-          self.playerOptions.badge = 0;
-          self.playerOptions.byline = 0;
-          self.playerOptions.portrait = 0;
-          self.playerOptions.title = 0;
+          self.playerOptions.controls = 0;
+        }
+
+        // enable background option
+        if (!self.options.showControls && self.options.loop && self.options.autoplay) {
           self.playerOptions.background = 1;
         }
 
@@ -591,6 +588,11 @@ class VideoWorker {
           document.body.appendChild(hiddenDiv);
         }
         self.player = self.player || new global.Vimeo.Player(self.$video, self.playerOptions);
+
+        // Since Vimeo removed the `volume` parameter, we have to set it manually.
+        if (!self.options.mute && typeof self.options.volume === 'number') {
+          self.setVolume(self.options.volume);
+        }
 
         // set current time for autoplay
         if (self.options.startTime && self.options.autoplay) {
@@ -644,6 +646,9 @@ class VideoWorker {
           self.fire('ready', e);
         });
         self.player.on('volumechange', (e) => {
+          self.getVolume((volume) => {
+            self.options.volume = volume;
+          });
           self.fire('volumechange', e);
         });
         self.player.on('error', (e) => {
@@ -670,8 +675,8 @@ class VideoWorker {
           // mute
           if (self.options.mute) {
             self.$video.muted = true;
-          } else if (self.$video.volume) {
-            self.$video.volume = self.options.volume / 100;
+          } else {
+            self.setVolume(self.options.volume);
           }
 
           // loop
