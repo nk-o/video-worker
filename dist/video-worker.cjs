@@ -1,5 +1,5 @@
 /*!
- * Video Worker v2.1.3 (https://github.com/nk-o/video-worker)
+ * Video Worker v2.1.4 (https://github.com/nk-o/video-worker)
  * Copyright 2022 nK <https://nkdev.info>
  * Licensed under MIT (https://github.com/nk-o/video-worker/blob/master/LICENSE)
  */
@@ -651,11 +651,14 @@ class VideoWorker {
             self.$video.controls = true;
           }
 
-          // mute
-          if (self.options.mute) {
-            self.$video.muted = true;
-          } else {
+          // set volume
+          if (typeof self.options.volume === 'number') {
             self.setVolume(self.options.volume);
+          }
+
+          // mute (it is required to mute after the volume set)
+          if (self.options.mute) {
+            self.mute();
           }
 
           // loop

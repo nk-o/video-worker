@@ -1,8 +1,9 @@
 # Changelog
 
-## [2.1.3] - Dec 17, 2022
+## [2.1.4] - Dec 17, 2022
 
 - fixed possibility to set volume 0
+- fixed self-hosted video mute on startup
 - fixed Vimeo set startup volume
 - fixed Vimeo update volume option when change volume in the player UI
 - removed `extend` method from the VideoWorker class
