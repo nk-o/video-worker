@@ -633,6 +633,7 @@ class VideoWorker {
       if (self.type === 'local') {
         if (!self.$video) {
           self.$video = document.createElement('video');
+          self.player = self.$video;
 
           // show controls
           if (self.options.showControls) {
@@ -672,8 +673,6 @@ class VideoWorker {
             addSourceToLocal(self.$video, self.videoID[key], `video/${key}`);
           });
         }
-
-        self.player = self.player || self.$video;
 
         let locStarted;
         self.player.addEventListener('playing', (e) => {
