@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.1.3] - Dec 17, 2022
+
+- fixed possibility to set volume 0
+- fixed Vimeo set startup volume
+- fixed Vimeo update volume option when change volume in the player UI
+- removed `extend` method from the VideoWorker class
+- removed fallback for `showContols` option, use `showControls` instead
+- removed unused player options from Vimeo
+
 ## [2.1.2] - Dec 15, 2022
 
 - added Vimeo high quality thumbnail support

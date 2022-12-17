@@ -1,6 +1,6 @@
 {
   "name": "video-worker",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "API wrapper for Youtube, Vimeo and Self-Hosted videos",
   "license": "MIT",
   "homepage": "https://github.com/nk-o/video-worker",
