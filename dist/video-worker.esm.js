@@ -1,6 +1,6 @@
 /*!
  * Video Worker v2.1.5 (https://github.com/nk-o/video-worker)
- * Copyright 2022 nK <https://nkdev.info>
+ * Copyright 2023 nK <https://nkdev.info>
  * Licensed under MIT (https://github.com/nk-o/video-worker/blob/master/LICENSE)
  */
 
