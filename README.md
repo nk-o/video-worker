@@ -16,6 +16,7 @@ API wrapper for Youtube, Vimeo and Self-Hosted videos
 - [Options](#options)
 - [Events](#events)
 - [Methods](#methods)
+- [Video Providers](#video-providers)
 - [For Developers](#for-developers)
 
 ## Import VideoWorker
@@ -164,6 +165,21 @@ getVideo | dom | Retrieves iframe/video dom element. `videoObject.getVideo((vide
 ```javascript
 videoObject.mute();
 ```
+
+## Video Providers
+
+By default VideoWorker provides support for Youtube, Vimeo and Self-Hosted videos. There is a possibility to extend providers list and add support for different platform.
+
+Example:
+
+```javascript
+VideoWorker.providers.MyVideoProvider = class MyVideoProvider extends VideoWorker.BaseClass {
+  type = 'my-video-provider';
+  ...
+}
+```
+
+All available methods for custom provider class you can find in existing providers - <https://github.com/nk-o/video-worker/tree/master/src/providers>
 
 ## For Developers
 
