@@ -61,6 +61,12 @@ class VideoWorkerYoutube extends BaseClass {
     return match && match[1].length === 11 ? match[1] : false;
   }
 
+  init() {
+    super.init();
+
+    loadAPI();
+  }
+
   play(start) {
     const self = this;
     if (!self.player || !self.player.playVideo) {
@@ -332,12 +338,6 @@ class VideoWorkerYoutube extends BaseClass {
 
       callback(self.$video);
     });
-  }
-
-  init() {
-    super.init();
-
-    loadAPI();
   }
 }
 

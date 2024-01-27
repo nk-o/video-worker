@@ -61,6 +61,28 @@ class VideoWorkerVimeo extends BaseClass {
     return match && match[3] ? match[3] : false;
   }
 
+  // Try to extract a hash for private videos from the URL.
+  // Thanks to https://github.com/sampotts/plyr
+  static parseURLHash(url) {
+    /* This regex matches a hexadecimal hash if given in any of these forms:
+     *  - [https://player.]vimeo.com/video/{id}/{hash}[?params]
+     *  - [https://player.]vimeo.com/video/{id}?h={hash}[&params]
+     *  - [https://player.]vimeo.com/video/{id}?[params]&h={hash}
+     *  - video/{id}/{hash}
+     * If matched, the hash is available in capture group 4
+     */
+    const regex = /^.*(vimeo.com\/|video\/)(\d+)(\?.*&*h=|\/)+([\d,a-f]+)/;
+    const found = url.match(regex);
+
+    return found && found.length === 5 ? found[4] : null;
+  }
+
+  init() {
+    super.init();
+
+    loadAPI();
+  }
+
   play(start) {
     const self = this;
     if (!self.player) {
@@ -241,6 +263,12 @@ class VideoWorkerVimeo extends BaseClass {
         muted: self.options.mute || self.options.volume === 0 ? 1 : 0,
       };
 
+      // private video hash
+      const urlHash = self.constructor.parseURLHash(self.url);
+      if (urlHash) {
+        self.playerOptions.h = urlHash;
+      }
+
       // hide controls
       if (!self.options.showControls) {
         self.playerOptions.controls = 0;
@@ -350,12 +378,6 @@ class VideoWorkerVimeo extends BaseClass {
 
       callback(self.$video);
     });
-  }
-
-  init() {
-    super.init();
-
-    loadAPI();
   }
 }
 
