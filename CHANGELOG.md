@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.0] - Jan 28, 2024
+
+- added support for private Vimeo videos hash in URL
+- added `setCurrentTime` and `getCurrentTime` methods
+- added possibility to extend supported video providers
+- fixed `play` method play when `endTime` reached
+- removed deprecated method `getIframe`. Use `getVideo` instead
+
 ## [2.1.5] - Dec 17, 2022
 
 - fixed possibility to set volume 0
