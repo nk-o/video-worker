@@ -136,32 +136,64 @@ class VideoWorker {
       return;
     }
 
+    const withCustomStart = typeof start !== 'undefined';
+
     if (self.type === 'youtube' && self.player.playVideo) {
-      if (typeof start !== 'undefined') {
+      if (withCustomStart) {
         self.player.seekTo(start || 0);
       }
+
       if (global.YT.PlayerState.PLAYING !== self.player.getPlayerState()) {
-        self.player.playVideo();
+        // Don't play if video is already ended and with no loop.
+        if (self.options.endTime && !self.options.loop) {
+          self.getCurrentTime((seconds) => {
+            if (seconds < self.options.endTime) {
+              self.player.playVideo();
+            }
+          });
+        } else {
+          self.player.playVideo();
+        }
       }
     }
 
     if (self.type === 'vimeo') {
-      if (typeof start !== 'undefined') {
+      if (withCustomStart) {
         self.player.setCurrentTime(start);
       }
+
       self.player.getPaused().then((paused) => {
         if (paused) {
-          self.player.play();
+          // Don't play if video is already ended and with no loop.
+          if (self.options.endTime && !self.options.loop) {
+            self.getCurrentTime((seconds) => {
+              if (seconds < self.options.endTime) {
+                self.player.play();
+              }
+            });
+          } else {
+            self.player.play();
+          }
         }
       });
     }
 
     if (self.type === 'local') {
-      if (typeof start !== 'undefined') {
+      if (withCustomStart) {
         self.player.currentTime = start;
       }
+
       if (self.player.paused) {
-        self.player.play();
+        // Don't play if video is already ended and with no loop.
+        if (self.options.endTime && !self.options.loop) {
+          self.getCurrentTime((seconds) => {
+            if (seconds < self.options.endTime) {
+              self.player.play();
+            }
+          });
+        } else {
+          self.player.play();
+        }
       }
     }
   }
@@ -292,6 +324,46 @@ class VideoWorker {
 
     if (self.type === 'local') {
       callback(self.$video.muted);
+    }
+  }
+
+  setCurrentTime(currentTime = false) {
+    const self = this;
+    if (!self.player || typeof currentTime !== 'number') {
+      return;
+    }
+
+    if (self.type === 'youtube' && self.player.seekTo) {
+      self.player.seekTo(currentTime);
+    }
+
+    if (self.type === 'vimeo' && self.player.setCurrentTime) {
+      self.player.setCurrentTime(currentTime);
+    }
+
+    if (self.type === 'local') {
+      self.$video.currentTime = currentTime;
+    }
+  }
+
+  getCurrentTime(callback) {
+    const self = this;
+    if (!self.player) {
+      return;
+    }
+
+    if (self.type === 'youtube' && self.player.getCurrentTime) {
+      callback(self.player.getCurrentTime());
+    }
+
+    if (self.type === 'vimeo' && self.player.getCurrentTime) {
+      self.player.getCurrentTime().then((currentTime) => {
+        callback(currentTime);
+      });
+    }
+
+    if (self.type === 'local') {
+      callback(self.player.currentTime);
     }
   }
 
@@ -585,13 +657,11 @@ class VideoWorker {
           self.fire('timeupdate', e);
 
           // check for end of video and play again or stop
-          if (self.options.endTime) {
-            if (self.options.endTime && e.seconds >= self.options.endTime) {
-              if (self.options.loop) {
-                self.play(self.options.startTime);
-              } else {
-                self.pause();
-              }
+          if (self.options.endTime && e.seconds >= self.options.endTime) {
+            if (self.options.loop) {
+              self.play(self.options.startTime);
+            } else {
+              self.pause();
             }
           }
         });
@@ -685,13 +755,11 @@ class VideoWorker {
           self.fire('timeupdate', e);
 
           // check for end of video and play again or stop
-          if (self.options.endTime) {
-            if (self.options.endTime && this.currentTime >= self.options.endTime) {
-              if (self.options.loop) {
-                self.play(self.options.startTime);
-              } else {
-                self.pause();
-              }
+          if (self.options.endTime && this.currentTime >= self.options.endTime) {
+            if (self.options.loop) {
+              self.play(self.options.startTime);
+            } else {
+              self.pause();
             }
           }
         });

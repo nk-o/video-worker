@@ -154,6 +154,8 @@ unmute | - | Unmute sound.
 getMuted | int | Get mute state. `videoObject.getMuted((muted) => { ... })`
 setVolume | - | Set volume level (takes integer value from 0 to 100). `videoObject.setVolume(40);`
 getVolume | int | Get volume level. `videoObject.getVolume((volume) => { ... })`
+setCurrentTime | - | Set current time in seconds. `videoObject.setCurrentTime(40);`
+getCurrentTime | int | Get current time in seconds. `videoObject.getCurrentTime((currentTime) => { ... })`
 getImageURL | string | Retrieves Youtube/Vimeo video poster image URL. `videoObject.getImageURL((url) => { ... })`
 getVideo | dom | Retrieves iframe/video dom element. `videoObject.getVideo((video) => { ... })`
 
