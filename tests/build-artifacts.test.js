@@ -1,8 +1,7 @@
-import fs from 'fs';
-import { createRequire } from 'module';
-import path from 'path';
-import vm from 'vm';
-
+import fs from 'node:fs';
+import { createRequire } from 'node:module';
+import path from 'node:path';
+import vm from 'node:vm';
 import { JSDOM } from 'jsdom';
 import { describe, expect, it } from 'vitest';
 
@@ -22,6 +21,7 @@ describe('distribution artifact baseline', () => {
       'video-worker.js.map',
       'video-worker.min.js',
       'video-worker.min.js.map',
+      'types/video-worker.d.ts',
     ];
 
     expectedFiles.forEach((file) => {
@@ -31,7 +31,7 @@ describe('distribution artifact baseline', () => {
 
   it('loads the CommonJS bundle', () => {
     const mod = require(path.join(distDir, 'video-worker.cjs'));
-    const exported = mod && mod.default ? mod.default : mod;
+    const exported = mod?.default ? mod.default : mod;
 
     expect(exported).toBeTypeOf('function');
     expect(exported.providers).toBeDefined();

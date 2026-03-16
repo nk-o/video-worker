@@ -1,15 +1,17 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { babel } from '@rollup/plugin-babel';
+
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
 import terser from '@rollup/plugin-terser';
+import esbuild from 'rollup-plugin-esbuild';
 import serve from 'rollup-plugin-serve';
-import fs from 'fs';
 
 // TODO: Wait once this issue will be fixed before update the terser plugin https://github.com/rollup/plugins/issues/1371
 // TODO: Remove this hack once this issue will be resolved https://github.com/rollup/plugins/issues/1366
-import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
-global['__filename'] = __filename;
+global.__filename = __filename;
 
 const data = JSON.parse(fs.readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
@@ -24,7 +26,7 @@ function getHeader() {
 `;
 }
 
-const input = './src/video-worker.js';
+const input = './src/video-worker.ts';
 
 const bundles = [
   {
@@ -94,9 +96,13 @@ const configs = bundles.map(({ input: inputPath, output }) => ({
   input: inputPath,
   output,
   plugins: [
-    babel({
-      babelHelpers: 'bundled',
-      plugins: ['annotate-pure-calls'],
+    nodeResolve({
+      extensions: ['.mjs', '.js', '.json', '.node', '.ts'],
+    }),
+    esbuild({
+      sourceMap: true,
+      target: 'es2018',
+      tsconfig: './tsconfig.json',
     }),
     replace({
       __DEV__: isSpecificEnv(output.file)

@@ -1,4 +1,6 @@
-export default {
+import type { VideoWorkerOptions } from './types';
+
+const defaults: VideoWorkerOptions = {
   autoplay: false,
   loop: false,
   mute: false,
@@ -10,3 +12,5 @@ export default {
   startTime: 0,
   endTime: 0,
 };
+
+export default defaults;
