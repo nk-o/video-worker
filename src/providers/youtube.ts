@@ -73,6 +73,10 @@ class VideoWorkerYoutube extends BaseClass {
 
   playerOptions?: YouTubePlayerOptions;
 
+  progressInterval?: ReturnType<typeof setInterval>;
+
+  volumeChangeInterval?: ReturnType<typeof setInterval>;
+
   static parseURL(url: string): string | false {
     const regExp = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=)([^#&?]*).*/;
     const match = url.match(regExp);
@@ -206,6 +210,10 @@ class VideoWorkerYoutube extends BaseClass {
   }
 
   getVideo(callback: ValueCallback<HTMLElement>): void {
+    if (this.destroyed) {
+      return;
+    }
+
     // return generated video block
     if (this.$video) {
       callback(this.$video as HTMLElement);
@@ -214,6 +222,10 @@ class VideoWorkerYoutube extends BaseClass {
 
     // generate new video block
     onAPIready(() => {
+      if (this.destroyed) {
+        return;
+      }
+
       let hiddenDiv: HTMLDivElement | undefined;
       if (!this.$video) {
         hiddenDiv = document.createElement('div');
@@ -254,7 +266,10 @@ class VideoWorkerYoutube extends BaseClass {
             }
 
             // volumechange
-            setInterval(() => {
+            if (this.volumeChangeInterval) {
+              clearInterval(this.volumeChangeInterval);
+            }
+            this.volumeChangeInterval = setInterval(() => {
               this.getVolume((volume) => {
                 if (typeof volume === 'number' && this.options.volume !== volume) {
                   this.options.volume = volume;
@@ -281,7 +296,6 @@ class VideoWorkerYoutube extends BaseClass {
 
       // events
       let ytStarted = false;
-      let ytProgressInterval: ReturnType<typeof setInterval> | undefined;
       this.playerOptions.events.onStateChange = (event: YouTubePlayerEvent) => {
         if (!videoGlobal.YT || !this.player) {
           return;
@@ -307,7 +321,10 @@ class VideoWorkerYoutube extends BaseClass {
 
         // progress check
         if (event.data === videoGlobal.YT.PlayerState.PLAYING) {
-          ytProgressInterval = setInterval(() => {
+          if (this.progressInterval) {
+            clearInterval(this.progressInterval);
+          }
+          this.progressInterval = setInterval(() => {
             if (!this.player) {
               return;
             }
@@ -323,13 +340,15 @@ class VideoWorkerYoutube extends BaseClass {
               }
             }
           }, 150);
-        } else if (ytProgressInterval) {
-          clearInterval(ytProgressInterval);
+        } else if (this.progressInterval) {
+          clearInterval(this.progressInterval);
+          this.progressInterval = undefined;
         }
       };
 
       const firstInit = !this.$video;
       if (firstInit && hiddenDiv) {
+        this.hiddenContainer = hiddenDiv;
         const div = document.createElement('div');
         div.setAttribute('id', this.playerID);
         hiddenDiv.appendChild(div);
@@ -356,6 +375,24 @@ class VideoWorkerYoutube extends BaseClass {
 
       callback(this.$video as HTMLElement);
     });
+  }
+
+  destroy(): void {
+    if (this.progressInterval) {
+      clearInterval(this.progressInterval);
+      this.progressInterval = undefined;
+    }
+
+    if (this.volumeChangeInterval) {
+      clearInterval(this.volumeChangeInterval);
+      this.volumeChangeInterval = undefined;
+    }
+
+    if (this.player?.destroy) {
+      this.player.destroy();
+    }
+
+    super.destroy();
   }
 }
 

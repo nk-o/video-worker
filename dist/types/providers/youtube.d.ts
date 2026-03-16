@@ -5,6 +5,8 @@ declare class VideoWorkerYoutube extends BaseClass {
     player?: YouTubePlayer;
     $video?: HTMLElement;
     playerOptions?: YouTubePlayerOptions;
+    progressInterval?: ReturnType<typeof setInterval>;
+    volumeChangeInterval?: ReturnType<typeof setInterval>;
     static parseURL(url: string): string | false;
     init(): void;
     play(start?: number): void;
@@ -18,6 +20,7 @@ declare class VideoWorkerYoutube extends BaseClass {
     getCurrentTime(callback: ValueCallback<number>): void;
     getImageURL(callback: ValueCallback<string>): void;
     getVideo(callback: ValueCallback<HTMLElement>): void;
+    destroy(): void;
 }
 export default VideoWorkerYoutube;
 //# sourceMappingURL=youtube.d.ts.map

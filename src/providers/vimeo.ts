@@ -72,6 +72,8 @@ class VideoWorkerVimeo extends BaseClass {
 
   playerOptions?: VimeoPlayerOptions;
 
+  imageRequest?: XMLHttpRequest;
+
   static parseURL(url: string): string | false {
     const regExp =
       /https?:\/\/(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/([^/]*)\/videos\/|album\/(\d+)\/video\/|video\/|)(\d+)(?:$|\/|\?)/;
@@ -184,7 +186,7 @@ class VideoWorkerVimeo extends BaseClass {
 
     if (this.player.getVolume) {
       this.player.getVolume().then((volume) => {
-        callback(!!volume);
+        callback(volume === 0);
       });
     }
   }
@@ -208,6 +210,10 @@ class VideoWorkerVimeo extends BaseClass {
   }
 
   getImageURL(callback: ValueCallback<string>): void {
+    if (this.destroyed) {
+      return;
+    }
+
     if (this.videoImage) {
       callback(this.videoImage);
       return;
@@ -221,6 +227,7 @@ class VideoWorkerVimeo extends BaseClass {
     width = Math.min(width, 1920);
 
     let request: XMLHttpRequest | null = new XMLHttpRequest();
+    this.imageRequest = request;
     // https://vimeo.com/api/oembed.json?url=https://vimeo.com/235212527
     request.open('GET', `https://vimeo.com/api/oembed.json?url=${this.url}&width=${width}`, true);
     request.onreadystatechange = () => {
@@ -237,12 +244,18 @@ class VideoWorkerVimeo extends BaseClass {
           callback(this.videoImage);
         }
       }
+
+      this.imageRequest = undefined;
     };
     request.send();
     request = null;
   }
 
   getVideo(callback: ValueCallback<HTMLIFrameElement>): void {
+    if (this.destroyed) {
+      return;
+    }
+
     // return generated video block
     if (this.$video) {
       callback(this.$video);
@@ -251,6 +264,10 @@ class VideoWorkerVimeo extends BaseClass {
 
     // generate new video block
     onAPIready(() => {
+      if (this.destroyed) {
+        return;
+      }
+
       let hiddenDiv: HTMLDivElement | undefined;
       if (!this.$video) {
         hiddenDiv = document.createElement('div');
@@ -285,6 +302,7 @@ class VideoWorkerVimeo extends BaseClass {
       }
 
       if (!this.$video && hiddenDiv) {
+        this.hiddenContainer = hiddenDiv;
         let playerOptionsString = '';
         Object.keys(this.playerOptions).forEach((key) => {
           const optionKey = key as keyof VimeoPlayerOptions;
@@ -396,6 +414,19 @@ class VideoWorkerVimeo extends BaseClass {
 
       callback(this.$video as HTMLIFrameElement);
     });
+  }
+
+  destroy(): void {
+    if (this.imageRequest) {
+      this.imageRequest.abort();
+      this.imageRequest = undefined;
+    }
+
+    if (this.player?.destroy) {
+      void this.player.destroy();
+    }
+
+    super.destroy();
   }
 }
 

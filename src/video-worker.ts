@@ -6,7 +6,7 @@ import type { VideoWorkerOptionsInput } from './types';
 
 export type { VideoWorkerOptions, VideoWorkerOptionsInput } from './types';
 
-type VideoWorkerInstance = VideoWorkerBase;
+export type VideoWorkerInstance = VideoWorkerBase;
 
 type VideoWorkerProvider = typeof VideoWorkerBase;
 

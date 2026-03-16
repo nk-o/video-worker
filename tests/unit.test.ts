@@ -53,7 +53,7 @@ describe('unit coverage baseline', () => {
   });
 
   it('executes deferred done and fail callbacks', () => {
-    const deferred = new Deferred();
+    const deferred = new Deferred<[string]>();
     const done = vi.fn();
     const fail = vi.fn();
 
@@ -68,7 +68,7 @@ describe('unit coverage baseline', () => {
 
   it('fires event callbacks with the instance as context', () => {
     const video = new BaseClass('invalid-url');
-    const callback = vi.fn(function callback(payload) {
+    const callback = vi.fn(function callback(this: BaseClass, payload: unknown) {
       expect(this).toBe(video);
       expect(payload).toBe('ready');
     });

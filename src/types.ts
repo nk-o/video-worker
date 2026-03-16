@@ -22,6 +22,7 @@ export type VideoWorkerElement = HTMLElement | HTMLIFrameElement | HTMLVideoElem
 export type ValueCallback<T> = (value: T) => void;
 
 export interface YouTubePlayer {
+  destroy?(): void;
   getCurrentTime(): number;
   getDuration(): number;
   getPlayerState(): number;
@@ -66,6 +67,7 @@ export interface VimeoPlayerEvent {
 }
 
 export interface VimeoPlayer {
+  destroy?(): Promise<void> | void;
   getCurrentTime(): Promise<number>;
   getPaused(): Promise<boolean>;
   getVideoHeight(): Promise<number>;

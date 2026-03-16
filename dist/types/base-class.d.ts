@@ -10,9 +10,11 @@ declare class VideoWorkerBase {
     userEventsList?: Record<string, Array<VideoWorkerEventCallback | false>>;
     player?: unknown;
     $video?: VideoWorkerElement;
+    hiddenContainer?: HTMLDivElement;
     videoImage?: string;
     videoWidth?: number;
     videoHeight?: number;
+    destroyed: boolean;
     constructor(url: string, options?: VideoWorkerOptionsInput);
     isValid(): boolean;
     init(): void;
@@ -34,6 +36,7 @@ declare class VideoWorkerBase {
     getCurrentTime(_callback: ValueCallback<number>): void;
     getImageURL(_callback: ValueCallback<string>): void;
     getVideo(_callback: ValueCallback<VideoWorkerElement>): void;
+    destroy(): void;
 }
 export default VideoWorkerBase;
 //# sourceMappingURL=base-class.d.ts.map

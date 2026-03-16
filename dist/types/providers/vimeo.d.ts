@@ -5,6 +5,7 @@ declare class VideoWorkerVimeo extends BaseClass {
     player?: VimeoPlayer;
     $video?: HTMLIFrameElement;
     playerOptions?: VimeoPlayerOptions;
+    imageRequest?: XMLHttpRequest;
     static parseURL(url: string): string | false;
     static parseURLHash(url: string): string | null;
     init(): void;
@@ -19,6 +20,7 @@ declare class VideoWorkerVimeo extends BaseClass {
     getCurrentTime(callback: ValueCallback<number>): void;
     getImageURL(callback: ValueCallback<string>): void;
     getVideo(callback: ValueCallback<HTMLIFrameElement>): void;
+    destroy(): void;
 }
 export default VideoWorkerVimeo;
 //# sourceMappingURL=vimeo.d.ts.map

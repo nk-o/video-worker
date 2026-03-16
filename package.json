@@ -31,9 +31,9 @@
     "format:check": "biome format .",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:artifacts": "vitest run tests/build-artifacts.test.js",
+    "test:artifacts": "vitest run tests/build-artifacts.test.ts",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.tests.json",
     "prepare": "husky"
   },
   "repository": {
@@ -56,6 +56,8 @@
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-replace": "^6.0.3",
     "@rollup/plugin-terser": "^1.0.0",
+    "@types/jsdom": "^28.0.0",
+    "@types/node": "^25.5.0",
     "@vitest/coverage-v8": "^4.1.0",
     "cross-env": "^10.1.0",
     "husky": "^9.1.7",

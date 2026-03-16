@@ -1,7 +1,7 @@
 import VideoWorkerBase from './base-class';
 import type { VideoWorkerOptionsInput } from './types';
 export type { VideoWorkerOptions, VideoWorkerOptionsInput } from './types';
-type VideoWorkerInstance = VideoWorkerBase;
+export type VideoWorkerInstance = VideoWorkerBase;
 type VideoWorkerProvider = typeof VideoWorkerBase;
 interface VideoWorkerFactory {
     (url: string, options?: VideoWorkerOptionsInput): VideoWorkerInstance;

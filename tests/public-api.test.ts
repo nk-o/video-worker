@@ -54,7 +54,7 @@ describe('public API baseline', () => {
     class CustomProvider extends VideoWorker.BaseClass {
       type = 'custom';
 
-      static parseURL(url) {
+      static parseURL(url: string): string | false {
         return url.startsWith('custom:') ? url.slice('custom:'.length) : false;
       }
     }
@@ -108,5 +108,23 @@ describe('public API baseline', () => {
     video.fire('ready', 'ignored');
 
     expect(second).toHaveBeenCalledTimes(2);
+  });
+
+  it('cleans up detached DOM and listeners with destroy', () => {
+    const video = new VideoWorker('mp4:./clip.mp4');
+    let element: HTMLVideoElement | undefined;
+
+    video.getVideo((node) => {
+      element = node as HTMLVideoElement;
+    });
+
+    expect(element).toBeInstanceOf(HTMLVideoElement);
+    expect(document.body.contains(element as HTMLVideoElement)).toBe(true);
+
+    video.destroy();
+
+    expect(document.body.contains(element as HTMLVideoElement)).toBe(false);
+    expect(video.$video).toBeUndefined();
+    expect(video.player).toBeUndefined();
   });
 });

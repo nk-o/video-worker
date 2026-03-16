@@ -8,6 +8,17 @@ class VideoWorkerLocal extends BaseClass {
 
   $video?: HTMLVideoElement;
 
+  eventHandlers?: {
+    ended: (event: Event) => void;
+    error: (event: Event) => void;
+    loadedmetadata: (event: Event) => void;
+    pause: (event: Event) => void;
+    play: (event: Event) => void;
+    playing: (event: Event) => void;
+    timeupdate: (event: Event) => void;
+    volumechange: (event: Event) => void;
+  };
+
   static parseURL(url: string): VideoWorkerVideoSources | false {
     const videoFormats = url.split(/,(?=mp4:|webm:|ogv:|ogg:)/);
     const result: VideoWorkerVideoSources = {};
@@ -121,6 +132,10 @@ class VideoWorkerLocal extends BaseClass {
   }
 
   getVideo(callback: ValueCallback<HTMLVideoElement>): void {
+    if (this.destroyed) {
+      return;
+    }
+
     // return generated video block
     if (this.$video) {
       callback(this.$video);
@@ -144,6 +159,7 @@ class VideoWorkerLocal extends BaseClass {
     if (!this.$video && hiddenDiv) {
       this.$video = document.createElement('video');
       this.player = this.$video;
+      this.hiddenContainer = hiddenDiv;
 
       // show controls
       if (this.options.showControls) {
@@ -187,66 +203,96 @@ class VideoWorkerLocal extends BaseClass {
           addSourceElement(this.$video as HTMLVideoElement, sourceValue, `video/${key}`);
         }
       });
+      const player = this.player as HTMLVideoElement;
+      let localStarted = false;
+      this.eventHandlers = {
+        playing: (event: Event) => {
+          if (!localStarted) {
+            this.fire('started', event);
+          }
+          localStarted = true;
+        },
+        timeupdate: (event: Event) => {
+          this.fire('timeupdate', event);
+
+          // check for end of video and play again or stop
+          if (
+            this.options.endTime &&
+            this.player &&
+            this.player.currentTime >= this.options.endTime
+          ) {
+            if (this.options.loop) {
+              this.play(this.options.startTime);
+            } else {
+              this.pause();
+            }
+          }
+        },
+        play: (event: Event) => {
+          this.fire('play', event);
+        },
+        pause: (event: Event) => {
+          this.fire('pause', event);
+        },
+        ended: (event: Event) => {
+          this.fire('ended', event);
+        },
+        loadedmetadata: (event: Event) => {
+          if (!this.player) {
+            return;
+          }
+
+          // get video width and height
+          this.videoWidth = this.player.videoWidth || 1280;
+          this.videoHeight = this.player.videoHeight || 720;
+
+          this.fire('ready', event);
+
+          // autoplay
+          if (this.options.autoplay) {
+            this.play(this.options.startTime);
+          }
+        },
+        volumechange: (event: Event) => {
+          this.getVolume((volume) => {
+            if (typeof volume === 'number') {
+              this.options.volume = volume;
+            }
+          });
+          this.fire('volumechange', event);
+        },
+        error: (event: Event) => {
+          this.fire('error', event);
+        },
+      };
+
+      player.addEventListener('playing', this.eventHandlers.playing);
+      player.addEventListener('timeupdate', this.eventHandlers.timeupdate);
+      player.addEventListener('play', this.eventHandlers.play);
+      player.addEventListener('pause', this.eventHandlers.pause);
+      player.addEventListener('ended', this.eventHandlers.ended);
+      player.addEventListener('loadedmetadata', this.eventHandlers.loadedmetadata);
+      player.addEventListener('volumechange', this.eventHandlers.volumechange);
+      player.addEventListener('error', this.eventHandlers.error);
     }
 
-    const player = this.player as HTMLVideoElement;
-    let localStarted = false;
-    player.addEventListener('playing', (event) => {
-      if (!localStarted) {
-        this.fire('started', event);
-      }
-      localStarted = true;
-    });
-    player.addEventListener('timeupdate', (event) => {
-      this.fire('timeupdate', event);
-
-      // check for end of video and play again or stop
-      if (this.options.endTime && this.player && this.player.currentTime >= this.options.endTime) {
-        if (this.options.loop) {
-          this.play(this.options.startTime);
-        } else {
-          this.pause();
-        }
-      }
-    });
-    player.addEventListener('play', (event) => {
-      this.fire('play', event);
-    });
-    player.addEventListener('pause', (event) => {
-      this.fire('pause', event);
-    });
-    player.addEventListener('ended', (event) => {
-      this.fire('ended', event);
-    });
-    player.addEventListener('loadedmetadata', (event) => {
-      if (!this.player) {
-        return;
-      }
-
-      // get video width and height
-      this.videoWidth = this.player.videoWidth || 1280;
-      this.videoHeight = this.player.videoHeight || 720;
-
-      this.fire('ready', event);
-
-      // autoplay
-      if (this.options.autoplay) {
-        this.play(this.options.startTime);
-      }
-    });
-    player.addEventListener('volumechange', (event) => {
-      this.getVolume((volume) => {
-        if (typeof volume === 'number') {
-          this.options.volume = volume;
-        }
-      });
-      this.fire('volumechange', event);
-    });
-    player.addEventListener('error', (event) => {
-      this.fire('error', event);
-    });
-
     callback(this.$video as HTMLVideoElement);
+  }
+
+  destroy(): void {
+    if (this.player && this.eventHandlers) {
+      this.player.removeEventListener('playing', this.eventHandlers.playing);
+      this.player.removeEventListener('timeupdate', this.eventHandlers.timeupdate);
+      this.player.removeEventListener('play', this.eventHandlers.play);
+      this.player.removeEventListener('pause', this.eventHandlers.pause);
+      this.player.removeEventListener('ended', this.eventHandlers.ended);
+      this.player.removeEventListener('loadedmetadata', this.eventHandlers.loadedmetadata);
+      this.player.removeEventListener('volumechange', this.eventHandlers.volumechange);
+      this.player.removeEventListener('error', this.eventHandlers.error);
+    }
+
+    this.eventHandlers = undefined;
+    super.destroy();
   }
 }
 

@@ -15,6 +15,7 @@ export type ParsedVideoID = string | VideoWorkerVideoSources | false;
 export type VideoWorkerElement = HTMLElement | HTMLIFrameElement | HTMLVideoElement;
 export type ValueCallback<T> = (value: T) => void;
 export interface YouTubePlayer {
+    destroy?(): void;
     getCurrentTime(): number;
     getDuration(): number;
     getPlayerState(): number;
@@ -54,6 +55,7 @@ export interface VimeoPlayerEvent {
     seconds: number;
 }
 export interface VimeoPlayer {
+    destroy?(): Promise<void> | void;
     getCurrentTime(): Promise<number>;
     getPaused(): Promise<boolean>;
     getVideoHeight(): Promise<number>;

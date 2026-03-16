@@ -60,4 +60,10 @@ if (packageJson.exports['./package.json'] !== './package.json') {
   throw new Error('Expected package.json exports["./package.json"] to be defined');
 }
 
+for (const entry of ['dist', 'src']) {
+  if (!packageJson.files.includes(entry)) {
+    throw new Error(`Expected package.json files to include "${entry}" for compatibility`);
+  }
+}
+
 console.log('Build artifact validation passed.');

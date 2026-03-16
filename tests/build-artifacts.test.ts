@@ -30,7 +30,10 @@ describe('distribution artifact baseline', () => {
   });
 
   it('loads the CommonJS bundle', () => {
-    const mod = require(path.join(distDir, 'video-worker.cjs'));
+    const mod = require(path.join(distDir, 'video-worker.cjs')) as {
+      default?: { providers?: unknown };
+      providers?: unknown;
+    };
     const exported = mod?.default ? mod.default : mod;
 
     expect(exported).toBeTypeOf('function');
@@ -38,7 +41,9 @@ describe('distribution artifact baseline', () => {
   });
 
   it('loads the ESM bundle', async () => {
-    const mod = await import(path.join(distDir, 'video-worker.esm.js'));
+    const mod = (await import(path.join(distDir, 'video-worker.esm.js'))) as {
+      default: { providers?: unknown };
+    };
 
     expect(mod.default).toBeTypeOf('function');
     expect(mod.default.providers).toBeDefined();
@@ -51,10 +56,13 @@ describe('distribution artifact baseline', () => {
       url: 'https://example.com',
     });
     const context = dom.getInternalVMContext();
+    const windowWithVideoWorker = dom.window as unknown as Window & {
+      VideoWorker?: { providers?: unknown };
+    };
 
     vm.runInContext(source, context);
 
-    expect(dom.window.VideoWorker).toBeTypeOf('function');
-    expect(dom.window.VideoWorker.providers).toBeDefined();
+    expect(windowWithVideoWorker.VideoWorker).toBeTypeOf('function');
+    expect(windowWithVideoWorker.VideoWorker?.providers).toBeDefined();
   });
 });

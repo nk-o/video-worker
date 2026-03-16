@@ -32,11 +32,15 @@ class VideoWorkerBase {
 
   $video?: VideoWorkerElement;
 
+  hiddenContainer?: HTMLDivElement;
+
   videoImage?: string;
 
   videoWidth?: number;
 
   videoHeight?: number;
+
+  destroyed = false;
 
   constructor(url: string, options?: VideoWorkerOptionsInput) {
     this.url = url;
@@ -133,6 +137,23 @@ class VideoWorkerBase {
   getImageURL(_callback: ValueCallback<string>): void {}
 
   getVideo(_callback: ValueCallback<VideoWorkerElement>): void {}
+
+  destroy(): void {
+    this.destroyed = true;
+    this.userEventsList = undefined;
+
+    if (this.$video?.parentNode) {
+      this.$video.parentNode.removeChild(this.$video);
+    }
+
+    if (this.hiddenContainer?.parentNode) {
+      this.hiddenContainer.parentNode.removeChild(this.hiddenContainer);
+    }
+
+    this.player = undefined;
+    this.$video = undefined;
+    this.hiddenContainer = undefined;
+  }
 }
 
 export default VideoWorkerBase;

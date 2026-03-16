@@ -5,7 +5,13 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
+      thresholds: {
+        statements: 63,
+        branches: 38,
+        functions: 50,
+        lines: 70,
+      },
     },
-    include: ['tests/**/*.test.js'],
+    include: ['tests/**/*.test.ts'],
   },
 });

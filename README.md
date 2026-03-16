@@ -2,35 +2,57 @@
 
 ![video-worker.min.js](https://img.badgesize.io/nk-o/video-worker/master/dist/video-worker.min.js?compression=gzip)
 
-API wrapper for Youtube, Vimeo and Self-Hosted videos
+API wrapper for YouTube, Vimeo, and self-hosted videos.
 
 ## Table of Contents <!-- omit in toc -->
 
+- [Install](#install)
 - [Import VideoWorker](#import-videoworker)
-  - [ESM](#esm)
-  - [ESM CDN](#esm-cdn)
-  - [UMD](#umd)
-  - [UMD CDN](#umd-cdn)
-  - [CJS (Bundlers like Webpack)](#cjs-bundlers-like-webpack)
 - [Use VideoWorker](#use-videoworker)
 - [Options](#options)
 - [Events](#events)
 - [Methods](#methods)
-- [Video Providers](#video-providers)
+- [Custom Providers](#custom-providers)
 - [For Developers](#for-developers)
+
+## Install
+
+```bash
+npm install video-worker
+```
+
+Video Worker ships with:
+
+- ESM and CommonJS entry points
+- UMD bundles in `dist/`
+- TypeScript declarations in `dist/types/`
+- Published `src/` files for compatibility with consumers that still inspect or bundle source paths
 
 ## Import VideoWorker
 
-Use one of the following examples to import script.
-
 ### ESM
 
-We provide a version of VideoWorker built as ESM (video-worker.esm.js and video-worker.esm.min.js) which allows you to use VideoWorker as a module in your browser, if your [targeted browsers support it](https://caniuse.com/es6-module).
+```javascript
+import VideoWorker from 'video-worker';
+```
 
-```html
-<script type="module">
-  import VideoWorker from "video-worker.esm.min.js";
-</script>
+### TypeScript
+
+```ts
+import VideoWorker, { type VideoWorkerOptions } from 'video-worker';
+
+const options: VideoWorkerOptions = {
+  autoplay: false,
+  loop: false,
+  mute: false,
+  volume: 100,
+  showControls: true,
+  accessibilityHidden: false,
+  startTime: 0,
+  endTime: 0,
+};
+
+const video = new VideoWorker('https://www.youtube.com/watch?v=ab0TSkLe-E0', options);
 ```
 
 ### ESM CDN
@@ -43,12 +65,11 @@ We provide a version of VideoWorker built as ESM (video-worker.esm.js and video-
 
 ### UMD
 
-VideoWorker may be also used in a traditional way by including script in HTML and using library by accessing `window.VideoWorker`.
+VideoWorker can also be used in a traditional browser setup through `window.VideoWorker`.
 
 ```html
 <script src="video-worker.min.js"></script>
 ```
-
 
 ### UMD CDN
 
@@ -56,18 +77,10 @@ VideoWorker may be also used in a traditional way by including script in HTML an
 <script src="https://cdn.jsdelivr.net/npm/video-worker@2/dist/video-worker.min.js"></script>
 ```
 
-### CJS (Bundlers like Webpack)
-
-Install VideoWorker as a Node.js module using npm
-
-```
-npm install video-worker
-```
-
-Import VideoWorker by adding this line to your app's entry point (usually `index.js` or `app.js`):
+### CommonJS
 
 ```javascript
-import VideoWorker from 'video-worker';
+const VideoWorker = require('video-worker');
 ```
 
 ## Use VideoWorker
@@ -78,39 +91,39 @@ import VideoWorker from 'video-worker';
 const videoObject = new VideoWorker('https://www.youtube.com/watch?v=ab0TSkLe-E0');
 
 if (videoObject.isValid()) {
-  // retrieve iframe/video dom element.
   videoObject.getVideo((video) => {
-    const $parent = video.parentNode;
+    const parent = video.parentNode;
 
-    // insert video in the body.
     document.body.appendChild(video);
 
-    // remove temporary parent video element (created by VideoWorker).
-    $parent.parentNode.removeChild($parent);
+    if (parent?.parentNode) {
+      parent.parentNode.removeChild(parent);
+    }
   });
 }
 ```
 
-Video URLs examples:
+Supported URL examples:
 
-* YouTube `https://www.youtube.com/watch?v=ab0TSkLe-E0`
-* Vimeo `https://vimeo.com/110138539`
-* Self Hosted `mp4:./self-hosted-video.mp4,webm:./self-hosted-video.webm,ogv:./self-hosted-video.ogv`
+- YouTube `https://www.youtube.com/watch?v=ab0TSkLe-E0`
+- YouTube Shorts `https://www.youtube.com/shorts/ab0TSkLe-E0`
+- Vimeo `https://vimeo.com/110138539`
+- Self-hosted `mp4:./self-hosted-video.mp4,webm:./self-hosted-video.webm,ogv:./self-hosted-video.ogv`
 
-Note: for self-hosted videos required only 1 video type, not necessary use all mp4, webm and ogv. This need only for maximum compatibility with all browsers.
+For self-hosted videos, a single source is enough. Multiple formats are only needed for broader browser compatibility.
 
 ## Options
 
 Name | Type | Default | Description
 :--- | :--- | :------ | :----------
-autoplay | bool | `false` | Video autoplay.
-loop | bool | `false` | Video playing loop.
-showControls | bool | `true` | Video controls.
-accessibilityHidden | bool | `false` | Add accessibility attributes for videos used on backgrounds.
-mute | bool | `false` | Mute sound.
-volume | int | `100` | Volume level from 0 to 100.
-startTime | float | `0` | Start time in seconds when video will be started (this value will be applied also after loop).
-endTime | float | `0` | End time in seconds when video will be ended.
+autoplay | `boolean` | `false` | Video autoplay.
+loop | `boolean` | `false` | Loop playback.
+showControls | `boolean` | `true` | Show player controls.
+accessibilityHidden | `boolean` | `false` | Add accessibility attributes for videos used as decorative backgrounds.
+mute | `boolean` | `false` | Mute sound.
+volume | `number` | `100` | Volume level from `0` to `100`.
+startTime | `number` | `0` | Start time in seconds. Applied on autoplay and loop restarts.
+endTime | `number` | `0` | End time in seconds. Playback stops or loops once reached.
 
 ### Example <!-- omit in toc -->
 
@@ -126,14 +139,14 @@ new VideoWorker('<URL_TO_YOUR_VIDEO>', {
 
 Name | Parameters | Description
 :--- | :----- | :----------
-ready | `event` | Fires only once, when the video is ready to play.
-volumechange | `event` | Fires when video volume changed.
-timeupdate | `event` | Fires when video current time changed.
-started | `event` | Fires only once, when the video is started playing.
-play | `event` | Fires on video play start.
-pause | `event` | Fires on video paused.
-ended | `event` | Fires on video ended.
-error | `error` | Fires on video error
+ready | `event` | Fires once the video is ready to play.
+volumechange | `event` | Fires when video volume changes.
+timeupdate | `event` | Fires when playback time changes.
+started | `event` | Fires once, when playback starts for the first time.
+play | `event` | Fires when playback starts.
+pause | `event` | Fires when playback pauses.
+ended | `event` | Fires when playback ends.
+error | `error` | Fires when the provider reports an error.
 
 ### Example <!-- omit in toc -->
 
@@ -147,18 +160,19 @@ videoObject.on('ready', (event) => {
 
 Name | Result | Description
 :--- | :----- | :----------
-isValid | bool | Check if the video is successfully determined and ready to use.
-play | - | Play video.
-pause | - | Pause video.
-mute | - | Mute sound.
-unmute | - | Unmute sound.
-getMuted | int | Get mute state. `videoObject.getMuted((muted) => { ... })`
-setVolume | - | Set volume level (takes integer value from 0 to 100). `videoObject.setVolume(40);`
-getVolume | int | Get volume level. `videoObject.getVolume((volume) => { ... })`
-setCurrentTime | - | Set current time in seconds. `videoObject.setCurrentTime(40);`
-getCurrentTime | int | Get current time in seconds. `videoObject.getCurrentTime((currentTime) => { ... })`
-getImageURL | string | Retrieves Youtube/Vimeo video poster image URL. `videoObject.getImageURL((url) => { ... })`
-getVideo | dom | Retrieves iframe/video dom element. `videoObject.getVideo((video) => { ... })`
+isValid | `boolean` | Check if the video URL was recognized by a provider.
+play | `void` | Play the video.
+pause | `void` | Pause the video.
+mute | `void` | Mute audio.
+unmute | `void` | Unmute audio.
+getMuted | `boolean \| null` | Get mute state. `videoObject.getMuted((muted) => { ... })`
+setVolume | `void` | Set volume level from `0` to `100`. `videoObject.setVolume(40);`
+getVolume | `number \| false` | Get volume level. `videoObject.getVolume((volume) => { ... })`
+setCurrentTime | `void` | Set current time in seconds. `videoObject.setCurrentTime(40);`
+getCurrentTime | `number` | Get current time in seconds. `videoObject.getCurrentTime((currentTime) => { ... })`
+getImageURL | `string` | Retrieve YouTube or Vimeo preview image URL. `videoObject.getImageURL((url) => { ... })`
+getVideo | `HTMLElement \| HTMLIFrameElement \| HTMLVideoElement` | Retrieve the iframe or video DOM element. `videoObject.getVideo((video) => { ... })`
+destroy | `void` | Dispose internal DOM, timers, and player references when the instance is no longer needed.
 
 ### Example <!-- omit in toc -->
 
@@ -166,32 +180,43 @@ getVideo | dom | Retrieves iframe/video dom element. `videoObject.getVideo((vide
 videoObject.mute();
 ```
 
-## Video Providers
+## Custom Providers
 
-By default VideoWorker provides support for Youtube, Vimeo and Self-Hosted videos. There is a possibility to extend providers list and add support for different platform.
-
-Example:
+Video Worker supports YouTube, Vimeo, and self-hosted videos out of the box. You can register custom providers without changing the factory API.
 
 ```javascript
 VideoWorker.providers.MyVideoProvider = class MyVideoProvider extends VideoWorker.BaseClass {
   type = 'my-video-provider';
-  ...
-}
+
+  static parseURL(url) {
+    return url.startsWith('custom:') ? url.slice('custom:'.length) : false;
+  }
+};
 ```
 
-All available methods for custom provider class you can find in existing providers - <https://github.com/nk-o/video-worker/tree/master/src/providers>
+Provider implementations live in [`src/providers`](https://github.com/nk-o/video-worker/tree/master/src/providers).
 
 ## For Developers
 
 ### Installation <!-- omit in toc -->
 
-* Run `npm install` in the command line. Or if you need to update some dependencies, run `npm update`
+- Run `npm install`
 
-### Building <!-- omit in toc -->
+### Development <!-- omit in toc -->
 
-* `npm run build` to run build
+- `npm run dev` to build in watch mode and serve the demo on port `3002`
 
-### Linting <!-- omit in toc -->
+### Quality checks <!-- omit in toc -->
 
-* `npm run lint` to show Biome errors
-* `npm run lint:fix` to automatically fix some of the Biome errors
+- `npm run typecheck` to validate TypeScript
+- `npm run lint` to run Biome checks
+- `npm run lint:fix` to apply safe Biome fixes
+- `npm run format` to format files with Biome
+- `npm run format:check` to verify formatting
+- `npm run test:run` to run the test suite once
+- `npm run test:coverage` to generate coverage output
+- `npm run test:artifacts` to validate published build artifacts
+
+### Build <!-- omit in toc -->
+
+- `npm run build` to generate all bundles and declaration files
