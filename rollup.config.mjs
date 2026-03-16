@@ -3,6 +3,7 @@ import { babel } from '@rollup/plugin-babel';
 import replace from '@rollup/plugin-replace';
 import terser from '@rollup/plugin-terser';
 import serve from 'rollup-plugin-serve';
+import fs from 'fs';
 
 // TODO: Wait once this issue will be fixed before update the terser plugin https://github.com/rollup/plugins/issues/1371
 // TODO: Remove this hack once this issue will be resolved https://github.com/rollup/plugins/issues/1366
@@ -10,7 +11,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 global['__filename'] = __filename;
 
-import data from './package.json' assert { type: 'json' };
+const data = JSON.parse(fs.readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
 const year = new Date().getFullYear();
 
