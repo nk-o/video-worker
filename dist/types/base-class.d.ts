@@ -19,6 +19,9 @@ declare class VideoWorkerBase {
     on(name: string, callback: VideoWorkerEventCallback): void;
     off(name: string, callback?: VideoWorkerEventCallback): void;
     fire(name: string, ...args: unknown[]): void;
+    /**
+     * Methods used in providers.
+     */
     static parseURL(_url: string): ParsedVideoID;
     play(_start?: number): void;
     pause(): void;

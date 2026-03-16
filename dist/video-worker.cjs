@@ -4,16 +4,21 @@
  * Licensed under MIT (https://github.com/nk-o/video-worker/blob/master/LICENSE)
  */
 
-'use strict';const defaults = {
+'use strict';
+
+const defaults = {
   autoplay: false,
   loop: false,
   mute: false,
   volume: 100,
   showControls: true,
   accessibilityHidden: false,
+  // start / end video time in seconds
   startTime: 0,
   endTime: 0
-};function extend(out, ...args) {
+};
+
+function extend(out, ...args) {
   const target = out || {};
   Object.keys(args).forEach((index) => {
     const source = args[Number(index)];
@@ -29,7 +34,9 @@
     });
   });
   return target;
-}let ID = 0;
+}
+
+let ID = 0;
 class VideoWorkerBase {
   constructor(url, options) {
     this.type = "none";
@@ -49,6 +56,7 @@ class VideoWorkerBase {
     ID += 1;
     this.playerID = `VideoWorker-${this.ID}`;
   }
+  // events
   on(name, callback) {
     this.userEventsList = this.userEventsList || {};
     if (!this.userEventsList[name]) {
@@ -83,6 +91,9 @@ class VideoWorkerBase {
       });
     }
   }
+  /**
+   * Methods used in providers.
+   */
   static parseURL(_url) {
     return false;
   }
@@ -108,7 +119,9 @@ class VideoWorkerBase {
   }
   getVideo(_callback) {
   }
-}class VideoWorkerLocal extends VideoWorkerBase {
+}
+
+class VideoWorkerLocal extends VideoWorkerBase {
   constructor() {
     super(...arguments);
     this.type = "local";
@@ -300,7 +313,9 @@ class VideoWorkerBase {
     });
     callback(this.$video);
   }
-}class Deferred {
+}
+
+class Deferred {
   constructor() {
     this.doneCallbacks = [];
     this.failCallbacks = [];
@@ -324,7 +339,9 @@ class VideoWorkerBase {
   fail(callback) {
     this.failCallbacks.push(callback);
   }
-}let win;
+}
+
+let win;
 if (typeof window !== "undefined") {
   win = window;
 } else if (typeof self !== "undefined") {
@@ -332,7 +349,9 @@ if (typeof window !== "undefined") {
 } else {
   win = globalThis;
 }
-var global = win;let VimeoAPIadded = 0;
+var global = win;
+
+let VimeoAPIadded = 0;
 let loadingVimeoPlayer = 0;
 const loadingVimeoDefer = new Deferred();
 const videoGlobal$1 = global;
@@ -383,6 +402,8 @@ class VideoWorkerVimeo extends VideoWorkerBase {
     const match = url.match(regExp);
     return (match == null ? void 0 : match[3]) ? match[3] : false;
   }
+  // Try to extract a hash for private videos from the URL.
+  // Thanks to https://github.com/sampotts/plyr
   static parseURLHash(url) {
     const regex = /^.*(vimeo.com\/|video\/)(\d+)(\?.*&*h=|\/)+([\d,a-f]+)/;
     const found = url.match(regex);
@@ -519,6 +540,7 @@ class VideoWorkerVimeo extends VideoWorkerBase {
         hiddenDiv.style.display = "none";
       }
       this.playerOptions = {
+        // GDPR Compliance.
         dnt: 1,
         id: String(this.videoID),
         autopause: 0,
@@ -628,7 +650,9 @@ class VideoWorkerVimeo extends VideoWorkerBase {
       callback(this.$video);
     });
   }
-}let YoutubeAPIadded = 0;
+}
+
+let YoutubeAPIadded = 0;
 let loadingYoutubePlayer = 0;
 const loadingYoutubeDefer = new Deferred();
 const videoGlobal = global;
@@ -785,12 +809,14 @@ class VideoWorkerYoutube extends VideoWorkerBase {
         hiddenDiv.style.display = "none";
       }
       this.playerOptions = {
+        // GDPR Compliance.
         host: "https://www.youtube-nocookie.com",
         videoId: String(this.videoID),
         playerVars: {
           autohide: 1,
           rel: 0,
           autoplay: 0,
+          // autoplay enable on mobile devices
           playsinline: 1
         },
         events: {
@@ -893,7 +919,9 @@ class VideoWorkerYoutube extends VideoWorkerBase {
       callback(this.$video);
     });
   }
-}const VideoWorker = function(url, options) {
+}
+
+const VideoWorker = function(url, options) {
   let result = false;
   Object.keys(VideoWorker.providers).forEach((key) => {
     if (!result && VideoWorker.providers[key].parseURL(url)) {
@@ -907,4 +935,7 @@ VideoWorker.providers = {
   Youtube: VideoWorkerYoutube,
   Vimeo: VideoWorkerVimeo,
   Local: VideoWorkerLocal
-};module.exports=VideoWorker;//# sourceMappingURL=video-worker.cjs.map
+};
+
+module.exports = VideoWorker;
+//# sourceMappingURL=video-worker.cjs.map

@@ -17,6 +17,7 @@
     volume: 100,
     showControls: true,
     accessibilityHidden: false,
+    // start / end video time in seconds
     startTime: 0,
     endTime: 0
   };
@@ -59,6 +60,7 @@
       ID += 1;
       this.playerID = `VideoWorker-${this.ID}`;
     }
+    // events
     on(name, callback) {
       this.userEventsList = this.userEventsList || {};
       if (!this.userEventsList[name]) {
@@ -93,6 +95,9 @@
         });
       }
     }
+    /**
+     * Methods used in providers.
+     */
     static parseURL(_url) {
       return false;
     }
@@ -401,6 +406,8 @@
       const match = url.match(regExp);
       return (match == null ? void 0 : match[3]) ? match[3] : false;
     }
+    // Try to extract a hash for private videos from the URL.
+    // Thanks to https://github.com/sampotts/plyr
     static parseURLHash(url) {
       const regex = /^.*(vimeo.com\/|video\/)(\d+)(\?.*&*h=|\/)+([\d,a-f]+)/;
       const found = url.match(regex);
@@ -537,6 +544,7 @@
           hiddenDiv.style.display = "none";
         }
         this.playerOptions = {
+          // GDPR Compliance.
           dnt: 1,
           id: String(this.videoID),
           autopause: 0,
@@ -805,12 +813,14 @@
           hiddenDiv.style.display = "none";
         }
         this.playerOptions = {
+          // GDPR Compliance.
           host: "https://www.youtube-nocookie.com",
           videoId: String(this.videoID),
           playerVars: {
             autohide: 1,
             rel: 0,
             autoplay: 0,
+            // autoplay enable on mobile devices
             playsinline: 1
           },
           events: {

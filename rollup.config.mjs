@@ -74,16 +74,6 @@ const bundles = [
       exports: 'default',
     },
   },
-  {
-    input,
-    output: {
-      banner: getHeader(),
-      file: './dist/video-worker.cjs',
-      format: 'cjs',
-      exports: 'default',
-      compact: true,
-    },
-  },
 ];
 
 const isDev = () => process.env.NODE_ENV === 'dev';

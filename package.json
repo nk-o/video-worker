@@ -9,23 +9,31 @@
   "module": "dist/video-worker.esm.js",
   "types": "dist/types/video-worker.d.ts",
   "unpkg": "dist/video-worker.min.js",
+  "exports": {
+    ".": {
+      "types": "./dist/types/video-worker.d.ts",
+      "import": "./dist/video-worker.esm.js",
+      "require": "./dist/video-worker.cjs",
+      "default": "./dist/video-worker.esm.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "src",
     "dist"
   ],
   "scripts": {
     "dev": "cross-env NODE_ENV=dev rollup --config --sourcemap --watch",
-    "build": "rollup --config --sourcemap && tsc -p tsconfig.build.json",
+    "build": "rollup --config --sourcemap && tsc -p tsconfig.build.json && node ./scripts/validate-dist.mjs",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "format:check": "biome format .",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:artifacts": "vitest run tests/build-artifacts.test.js",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc -p tsconfig.json",
-    "js-lint": "biome check src tests rollup.config.mjs lint-staged.config.js package.json tsconfig.json tsconfig.build.json",
-    "js-lint-fix": "biome check --write src tests rollup.config.mjs lint-staged.config.js package.json tsconfig.json tsconfig.build.json",
     "prepare": "husky"
   },
   "repository": {

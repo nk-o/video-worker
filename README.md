@@ -193,5 +193,5 @@ All available methods for custom provider class you can find in existing provide
 
 ### Linting <!-- omit in toc -->
 
-* `npm run js-lint` to show eslint errors
-* `npm run js-lint-fix` to automatically fix some of the eslint errors
+* `npm run lint` to show Biome errors
+* `npm run lint:fix` to automatically fix some of the Biome errors
