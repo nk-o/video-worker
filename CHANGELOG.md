@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.0] - Mar 16, 2026
+
+- migrated the project source to TypeScript and published refreshed declaration files
+- modernized the build, test, and release pipeline around Rollup, Vitest, Biome, and current Node workflows
+- added `destroy` method to dispose internal DOM containers, timers, and player references when an instance is no longer needed
+- fixed Vimeo `getMuted` to report the effective mute state correctly
+- fixed duplicated YouTube progress polling on repeated `PLAYING` state changes
+
 ## [2.2.0] - Jan 28, 2024
 
 - added support for private Vimeo videos hash in URL

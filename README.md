@@ -8,6 +8,12 @@ API wrapper for YouTube, Vimeo, and self-hosted videos.
 
 - [Install](#install)
 - [Import VideoWorker](#import-videoworker)
+  - [ESM](#esm)
+  - [TypeScript](#typescript)
+  - [ESM CDN](#esm-cdn)
+  - [UMD](#umd)
+  - [UMD CDN](#umd-cdn)
+  - [CommonJS](#commonjs)
 - [Use VideoWorker](#use-videoworker)
 - [Options](#options)
 - [Events](#events)
