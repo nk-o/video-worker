@@ -1,77 +1,64 @@
 /*!
  * Video Worker v2.2.0 (https://github.com/nk-o/video-worker)
- * Copyright 2024 nK <https://nkdev.info>
+ * Copyright 2026 nK <https://nkdev.info>
  * Licensed under MIT (https://github.com/nk-o/video-worker/blob/master/LICENSE)
  */
 
-var defaults = {
+const defaults = {
   autoplay: false,
   loop: false,
   mute: false,
   volume: 100,
   showControls: true,
   accessibilityHidden: false,
-  // start / end video time in seconds
   startTime: 0,
   endTime: 0
 };
 
-/**
- * Extend like jQuery.extend
- *
- * @param {Object} out - output object.
- * @param {...any} args - additional objects to extend.
- *
- * @returns {Object}
- */
 function extend(out, ...args) {
-  out = out || {};
-  Object.keys(args).forEach(i => {
-    if (!args[i]) {
+  const target = out || {};
+  Object.keys(args).forEach((index) => {
+    const source = args[Number(index)];
+    if (!source) {
       return;
     }
-    Object.keys(args[i]).forEach(key => {
-      out[key] = args[i][key];
+    Object.keys(source).forEach((key) => {
+      const typedKey = key;
+      const value = source[typedKey];
+      if (typeof value !== "undefined") {
+        target[typedKey] = value;
+      }
     });
   });
-  return out;
+  return target;
 }
 
 let ID = 0;
 class VideoWorkerBase {
-  type = 'none';
   constructor(url, options) {
-    const self = this;
-    self.url = url;
-    self.options_default = {
-      ...defaults
-    };
-    self.options = extend({}, self.options_default, options);
-
-    // check URL
-    self.videoID = self.constructor.parseURL(url);
-
-    // init
-    if (self.videoID) {
-      self.init();
+    this.type = "none";
+    this.url = url;
+    this.options_default = { ...defaults };
+    this.options = extend({ ...this.options_default }, options);
+    this.videoID = this.constructor.parseURL(url);
+    if (this.videoID) {
+      this.init();
     }
   }
   isValid() {
     return !!this.videoID;
   }
   init() {
-    const self = this;
-    self.ID = ID;
+    this.ID = ID;
     ID += 1;
-    self.playerID = `VideoWorker-${self.ID}`;
+    this.playerID = `VideoWorker-${this.ID}`;
   }
-
-  // events
   on(name, callback) {
-    this.userEventsList = this.userEventsList || [];
-
-    // add new callback in events list
-    (this.userEventsList[name] || (this.userEventsList[name] = [])).push(callback);
+    this.userEventsList = this.userEventsList || {};
+    if (!this.userEventsList[name]) {
+      this.userEventsList[name] = [];
+    }
+    this.userEventsList[name].push(callback);
   }
   off(name, callback) {
     if (!this.userEventsList || !this.userEventsList[name]) {
@@ -79,422 +66,318 @@ class VideoWorkerBase {
     }
     if (!callback) {
       delete this.userEventsList[name];
-    } else {
-      this.userEventsList[name].forEach((val, key) => {
-        if (val === callback) {
-          this.userEventsList[name][key] = false;
-        }
-      });
+      return;
     }
+    this.userEventsList[name].forEach((value, key) => {
+      var _a;
+      if (value === callback) {
+        const eventList = (_a = this.userEventsList) == null ? void 0 : _a[name];
+        if (eventList) {
+          eventList[key] = false;
+        }
+      }
+    });
   }
   fire(name, ...args) {
-    if (this.userEventsList && typeof this.userEventsList[name] !== 'undefined') {
-      this.userEventsList[name].forEach(val => {
-        // call with all arguments
-        if (val) {
-          val.apply(this, args);
+    if (this.userEventsList && typeof this.userEventsList[name] !== "undefined") {
+      this.userEventsList[name].forEach((value) => {
+        if (value) {
+          value.apply(this, args);
         }
       });
     }
   }
-
-  /**
-   * Methods used in providers.
-   */
-  /* eslint-disable */
-  static parseURL(url) {
+  static parseURL(_url) {
     return false;
   }
-  play(start) {}
-  pause() {}
-  mute() {}
-  unmute() {}
-  setVolume(volume = false) {}
-  getVolume(callback) {}
-  getMuted(callback) {}
-  setCurrentTime(currentTime = false) {}
-  getCurrentTime(callback) {}
-  getImageURL(callback) {}
-  getVideo(callback) {}
-  /* eslint-enable */
+  play(_start) {
+  }
+  pause() {
+  }
+  mute() {
+  }
+  unmute() {
+  }
+  setVolume(_volume = false) {
+  }
+  getVolume(_callback) {
+  }
+  getMuted(_callback) {
+  }
+  setCurrentTime(_currentTime = false) {
+  }
+  getCurrentTime(_callback) {
+  }
+  getImageURL(_callback) {
+  }
+  getVideo(_callback) {
+  }
 }
 
-/* eslint-disable import/no-mutable-exports */
-/* eslint-disable no-restricted-globals */
-let win;
-if (typeof window !== 'undefined') {
-  win = window;
-} else if (typeof global !== 'undefined') {
-  win = global;
-} else if (typeof self !== 'undefined') {
-  win = self;
-} else {
-  win = {};
-}
-var global$1 = win;
-
-// Deferred
-// thanks http://stackoverflow.com/questions/18096715/implement-deferred-object-without-using-jquery
-function Deferred() {
-  this.doneCallbacks = [];
-  this.failCallbacks = [];
-}
-Deferred.prototype = {
-  execute(list, args) {
-    let i = list.length;
-    // eslint-disable-next-line no-param-reassign
-    args = Array.prototype.slice.call(args);
-    while (i) {
-      i -= 1;
-      list[i].apply(null, args);
+class VideoWorkerLocal extends VideoWorkerBase {
+  constructor() {
+    super(...arguments);
+    this.type = "local";
+  }
+  static parseURL(url) {
+    const videoFormats = url.split(/,(?=mp4:|webm:|ogv:|ogg:)/);
+    const result = {};
+    let ready = 0;
+    videoFormats.forEach((value) => {
+      const match = value.match(/^(mp4|webm|ogv|ogg):(.*)/);
+      if ((match == null ? void 0 : match[1]) && match[2]) {
+        const key = match[1] === "ogv" ? "ogg" : match[1];
+        result[key] = match[2];
+        ready = 1;
+      }
+    });
+    return ready ? result : false;
+  }
+  play(start) {
+    if (!this.player) {
+      return;
     }
-  },
+    if (typeof start !== "undefined") {
+      this.player.currentTime = start;
+    }
+    if (this.player.paused) {
+      if (this.options.endTime && !this.options.loop) {
+        this.getCurrentTime((seconds) => {
+          var _a;
+          if (seconds < this.options.endTime) {
+            void ((_a = this.player) == null ? void 0 : _a.play());
+          }
+        });
+      } else {
+        void this.player.play();
+      }
+    }
+  }
+  pause() {
+    if (!this.player || this.player.paused) {
+      return;
+    }
+    this.player.pause();
+  }
+  mute() {
+    if (!this.player || !this.$video) {
+      return;
+    }
+    this.$video.muted = true;
+  }
+  unmute() {
+    if (!this.player || !this.$video) {
+      return;
+    }
+    this.$video.muted = false;
+  }
+  setVolume(volume = false) {
+    if (!this.player || !this.$video || typeof volume !== "number") {
+      return;
+    }
+    this.$video.volume = volume / 100;
+  }
+  getVolume(callback) {
+    if (!this.player || !this.$video) {
+      callback(false);
+      return;
+    }
+    callback(this.$video.volume * 100);
+  }
+  getMuted(callback) {
+    if (!this.player || !this.$video) {
+      callback(null);
+      return;
+    }
+    callback(this.$video.muted);
+  }
+  setCurrentTime(currentTime = false) {
+    if (!this.player || !this.$video || typeof currentTime !== "number") {
+      return;
+    }
+    this.$video.currentTime = currentTime;
+  }
+  getCurrentTime(callback) {
+    if (!this.player) {
+      return;
+    }
+    callback(this.player.currentTime);
+  }
+  getImageURL(callback) {
+    if (this.videoImage) {
+      callback(this.videoImage);
+    }
+  }
+  getVideo(callback) {
+    if (this.$video) {
+      callback(this.$video);
+      return;
+    }
+    let hiddenDiv;
+    if (!this.$video) {
+      hiddenDiv = document.createElement("div");
+      hiddenDiv.style.display = "none";
+    }
+    function addSourceElement(element, src, type) {
+      const source = document.createElement("source");
+      source.src = src;
+      source.type = type;
+      element.appendChild(source);
+    }
+    if (!this.$video && hiddenDiv) {
+      this.$video = document.createElement("video");
+      this.player = this.$video;
+      if (this.options.showControls) {
+        this.$video.controls = true;
+      }
+      if (typeof this.options.volume === "number") {
+        this.setVolume(this.options.volume);
+      }
+      if (this.options.mute) {
+        this.mute();
+      }
+      if (this.options.loop) {
+        this.$video.loop = true;
+      }
+      this.$video.setAttribute("playsinline", "");
+      this.$video.setAttribute("webkit-playsinline", "");
+      if (this.options.accessibilityHidden) {
+        this.$video.setAttribute("tabindex", "-1");
+        this.$video.setAttribute("aria-hidden", "true");
+      }
+      this.$video.setAttribute("id", this.playerID);
+      hiddenDiv.appendChild(this.$video);
+      document.body.appendChild(hiddenDiv);
+      Object.keys(this.videoID).forEach((key) => {
+        const sourceValue = this.videoID[key];
+        if (sourceValue) {
+          addSourceElement(this.$video, sourceValue, `video/${key}`);
+        }
+      });
+    }
+    const player = this.player;
+    let localStarted = false;
+    player.addEventListener("playing", (event) => {
+      if (!localStarted) {
+        this.fire("started", event);
+      }
+      localStarted = true;
+    });
+    player.addEventListener("timeupdate", (event) => {
+      this.fire("timeupdate", event);
+      if (this.options.endTime && this.player && this.player.currentTime >= this.options.endTime) {
+        if (this.options.loop) {
+          this.play(this.options.startTime);
+        } else {
+          this.pause();
+        }
+      }
+    });
+    player.addEventListener("play", (event) => {
+      this.fire("play", event);
+    });
+    player.addEventListener("pause", (event) => {
+      this.fire("pause", event);
+    });
+    player.addEventListener("ended", (event) => {
+      this.fire("ended", event);
+    });
+    player.addEventListener("loadedmetadata", (event) => {
+      if (!this.player) {
+        return;
+      }
+      this.videoWidth = this.player.videoWidth || 1280;
+      this.videoHeight = this.player.videoHeight || 720;
+      this.fire("ready", event);
+      if (this.options.autoplay) {
+        this.play(this.options.startTime);
+      }
+    });
+    player.addEventListener("volumechange", (event) => {
+      this.getVolume((volume) => {
+        if (typeof volume === "number") {
+          this.options.volume = volume;
+        }
+      });
+      this.fire("volumechange", event);
+    });
+    player.addEventListener("error", (event) => {
+      this.fire("error", event);
+    });
+    callback(this.$video);
+  }
+}
+
+class Deferred {
+  constructor() {
+    this.doneCallbacks = [];
+    this.failCallbacks = [];
+  }
+  execute(list, args) {
+    let index = list.length;
+    while (index) {
+      index -= 1;
+      list[index](...args);
+    }
+  }
   resolve(...args) {
     this.execute(this.doneCallbacks, args);
-  },
+  }
   reject(...args) {
     this.execute(this.failCallbacks, args);
-  },
+  }
   done(callback) {
     this.doneCallbacks.push(callback);
-  },
+  }
   fail(callback) {
     this.failCallbacks.push(callback);
   }
-};
+}
 
-let YoutubeAPIadded = 0;
-let loadingYoutubePlayer = 0;
-const loadingYoutubeDefer = /*#__PURE__*/new Deferred();
+let win;
+if (typeof window !== "undefined") {
+  win = window;
+} else if (typeof self !== "undefined") {
+  win = self;
+} else {
+  win = globalThis;
+}
+var global = win;
+
+let VimeoAPIadded = 0;
+let loadingVimeoPlayer = 0;
+const loadingVimeoDefer = new Deferred();
+const videoGlobal$1 = global;
 function loadAPI$1() {
-  if (YoutubeAPIadded) {
+  if (VimeoAPIadded) {
     return;
   }
-  YoutubeAPIadded = true;
-  const src = 'https://www.youtube.com/iframe_api';
-
-  // add script in head section
-  let tag = document.createElement('script');
-  let head = document.getElementsByTagName('head')[0];
+  VimeoAPIadded = 1;
+  if (typeof videoGlobal$1.Vimeo !== "undefined") {
+    return;
+  }
+  const src = "https://player.vimeo.com/api/player.js";
+  let tag = document.createElement("script");
+  let head = document.getElementsByTagName("head")[0] || null;
+  if (!head || !tag) {
+    return;
+  }
   tag.src = src;
   head.appendChild(tag);
   head = null;
   tag = null;
 }
 function onAPIready$1(callback) {
-  // Listen for global YT player callback
-  if ((typeof global$1.YT === 'undefined' || global$1.YT.loaded === 0) && !loadingYoutubePlayer) {
-    // Prevents Ready event from being called twice
-    loadingYoutubePlayer = 1;
-
-    // Creates deferred so, other players know when to wait.
-    global$1.onYouTubeIframeAPIReady = function () {
-      global$1.onYouTubeIframeAPIReady = null;
-      loadingYoutubeDefer.resolve('done');
-      callback();
-    };
-  } else if (typeof global$1.YT === 'object' && global$1.YT.loaded === 1) {
-    callback();
-  } else {
-    loadingYoutubeDefer.done(() => {
-      callback();
-    });
-  }
-}
-class VideoWorkerYoutube extends VideoWorkerBase {
-  type = 'youtube';
-  static parseURL(url) {
-    // eslint-disable-next-line no-useless-escape
-    const regExp = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return match && match[1].length === 11 ? match[1] : false;
-  }
-  init() {
-    super.init();
-    loadAPI$1();
-  }
-  play(start) {
-    const self = this;
-    if (!self.player || !self.player.playVideo) {
-      return;
-    }
-    if (typeof start !== 'undefined') {
-      self.player.seekTo(start || 0);
-    }
-    if (global$1.YT.PlayerState.PLAYING !== self.player.getPlayerState()) {
-      // Don't play if video is already ended and with no loop.
-      if (self.options.endTime && !self.options.loop) {
-        self.getCurrentTime(seconds => {
-          if (seconds < self.options.endTime) {
-            self.player.playVideo();
-          }
-        });
-      } else {
-        self.player.playVideo();
-      }
-    }
-  }
-  pause() {
-    const self = this;
-    if (!self.player || !self.player.pauseVideo) {
-      return;
-    }
-    if (global$1.YT.PlayerState.PLAYING === self.player.getPlayerState()) {
-      self.player.pauseVideo();
-    }
-  }
-  mute() {
-    const self = this;
-    if (!self.player || !self.player.mute) {
-      return;
-    }
-    self.player.mute();
-  }
-  unmute() {
-    const self = this;
-    if (!self.player || !self.player.unMute) {
-      return;
-    }
-    self.player.unMute();
-  }
-  setVolume(volume = false) {
-    const self = this;
-    if (!self.player || typeof volume !== 'number' || !self.player.setVolume) {
-      return;
-    }
-    self.player.setVolume(volume);
-  }
-  getVolume(callback) {
-    const self = this;
-    if (!self.player) {
-      callback(false);
-      return;
-    }
-    if (self.player.getVolume) {
-      callback(self.player.getVolume());
-    }
-  }
-  getMuted(callback) {
-    const self = this;
-    if (!self.player) {
-      callback(null);
-      return;
-    }
-    if (self.player.isMuted) {
-      callback(self.player.isMuted());
-    }
-  }
-  setCurrentTime(currentTime = false) {
-    const self = this;
-    if (!self.player || typeof currentTime !== 'number' || !self.player.seekTo) {
-      return;
-    }
-    self.player.seekTo(currentTime);
-  }
-  getCurrentTime(callback) {
-    const self = this;
-    if (!self.player || !self.player.getCurrentTime) {
-      return;
-    }
-    callback(self.player.getCurrentTime());
-  }
-  getImageURL(callback) {
-    const self = this;
-    if (self.videoImage) {
-      callback(self.videoImage);
-      return;
-    }
-    const availableSizes = ['maxresdefault', 'sddefault', 'hqdefault', '0'];
-    let step = 0;
-    const tempImg = new Image();
-    tempImg.onload = function () {
-      // if no thumbnail, youtube add their own image with width = 120px
-      if ((this.naturalWidth || this.width) !== 120 || step === availableSizes.length - 1) {
-        // ok
-        self.videoImage = `https://img.youtube.com/vi/${self.videoID}/${availableSizes[step]}.jpg`;
-        callback(self.videoImage);
-      } else {
-        // try another size
-        step += 1;
-        this.src = `https://img.youtube.com/vi/${self.videoID}/${availableSizes[step]}.jpg`;
-      }
-    };
-    tempImg.src = `https://img.youtube.com/vi/${self.videoID}/${availableSizes[step]}.jpg`;
-  }
-  getVideo(callback) {
-    const self = this;
-
-    // return generated video block
-    if (self.$video) {
-      callback(self.$video);
-      return;
-    }
-
-    // generate new video block
-    onAPIready$1(() => {
-      let hiddenDiv;
-      if (!self.$video) {
-        hiddenDiv = document.createElement('div');
-        hiddenDiv.style.display = 'none';
-      }
-      self.playerOptions = {
-        // GDPR Compliance.
-        host: 'https://www.youtube-nocookie.com',
-        videoId: self.videoID,
-        playerVars: {
-          autohide: 1,
-          rel: 0,
-          autoplay: 0,
-          // autoplay enable on mobile devices
-          playsinline: 1
-        }
-      };
-
-      // hide controls
-      if (!self.options.showControls) {
-        self.playerOptions.playerVars.iv_load_policy = 3;
-        self.playerOptions.playerVars.modestbranding = 1;
-        self.playerOptions.playerVars.controls = 0;
-        self.playerOptions.playerVars.showinfo = 0;
-        self.playerOptions.playerVars.disablekb = 1;
-      }
-
-      // events
-      let ytStarted;
-      let ytProgressInterval;
-      self.playerOptions.events = {
-        onReady(e) {
-          // mute
-          if (self.options.mute) {
-            e.target.mute();
-          } else if (typeof self.options.volume === 'number') {
-            e.target.setVolume(self.options.volume);
-          }
-
-          // autoplay
-          if (self.options.autoplay) {
-            self.play(self.options.startTime);
-          }
-          self.fire('ready', e);
-
-          // For seamless loops, set the endTime to 0.1 seconds less than the video's duration
-          // https://github.com/nk-o/video-worker/issues/2
-          if (self.options.loop && !self.options.endTime) {
-            const secondsOffset = 0.1;
-            self.options.endTime = self.player.getDuration() - secondsOffset;
-          }
-
-          // volumechange
-          setInterval(() => {
-            self.getVolume(volume => {
-              if (self.options.volume !== volume) {
-                self.options.volume = volume;
-                self.fire('volumechange', e);
-              }
-            });
-          }, 150);
-        },
-        onStateChange(e) {
-          // loop
-          if (self.options.loop && e.data === global$1.YT.PlayerState.ENDED) {
-            self.play(self.options.startTime);
-          }
-          if (!ytStarted && e.data === global$1.YT.PlayerState.PLAYING) {
-            ytStarted = 1;
-            self.fire('started', e);
-          }
-          if (e.data === global$1.YT.PlayerState.PLAYING) {
-            self.fire('play', e);
-          }
-          if (e.data === global$1.YT.PlayerState.PAUSED) {
-            self.fire('pause', e);
-          }
-          if (e.data === global$1.YT.PlayerState.ENDED) {
-            self.fire('ended', e);
-          }
-
-          // progress check
-          if (e.data === global$1.YT.PlayerState.PLAYING) {
-            ytProgressInterval = setInterval(() => {
-              self.fire('timeupdate', e);
-
-              // check for end of video and play again or stop
-              if (self.options.endTime && self.player.getCurrentTime() >= self.options.endTime) {
-                if (self.options.loop) {
-                  self.play(self.options.startTime);
-                } else {
-                  self.pause();
-                }
-              }
-            }, 150);
-          } else {
-            clearInterval(ytProgressInterval);
-          }
-        },
-        onError(e) {
-          self.fire('error', e);
-        }
-      };
-      const firstInit = !self.$video;
-      if (firstInit) {
-        const div = document.createElement('div');
-        div.setAttribute('id', self.playerID);
-        hiddenDiv.appendChild(div);
-        document.body.appendChild(hiddenDiv);
-      }
-      self.player = self.player || new global$1.YT.Player(self.playerID, self.playerOptions);
-      if (firstInit) {
-        self.$video = document.getElementById(self.playerID);
-
-        // add accessibility attributes
-        if (self.options.accessibilityHidden) {
-          self.$video.setAttribute('tabindex', '-1');
-          self.$video.setAttribute('aria-hidden', 'true');
-        }
-
-        // get video width and height
-        self.videoWidth = parseInt(self.$video.getAttribute('width'), 10) || 1280;
-        self.videoHeight = parseInt(self.$video.getAttribute('height'), 10) || 720;
-      }
-      callback(self.$video);
-    });
-  }
-}
-
-let VimeoAPIadded = 0;
-let loadingVimeoPlayer = 0;
-const loadingVimeoDefer = /*#__PURE__*/new Deferred();
-function loadAPI() {
-  if (VimeoAPIadded) {
-    return;
-  }
-  VimeoAPIadded = true;
-
-  // Useful when Vimeo API added using RequireJS https://github.com/nk-o/video-worker/pull/7
-  if (typeof global$1.Vimeo !== 'undefined') {
-    return;
-  }
-  const src = 'https://player.vimeo.com/api/player.js';
-
-  // add script in head section
-  let tag = document.createElement('script');
-  let head = document.getElementsByTagName('head')[0];
-  tag.src = src;
-  head.appendChild(tag);
-  head = null;
-  tag = null;
-}
-function onAPIready(callback) {
-  if (typeof global$1.Vimeo === 'undefined' && !loadingVimeoPlayer) {
+  if (typeof videoGlobal$1.Vimeo === "undefined" && !loadingVimeoPlayer) {
     loadingVimeoPlayer = 1;
     const vimeoInterval = setInterval(() => {
-      if (typeof global$1.Vimeo !== 'undefined') {
+      if (typeof videoGlobal$1.Vimeo !== "undefined") {
         clearInterval(vimeoInterval);
-        loadingVimeoDefer.resolve('done');
+        loadingVimeoDefer.resolve("done");
         callback();
       }
     }, 20);
-  } else if (typeof global$1.Vimeo !== 'undefined') {
+  } else if (typeof videoGlobal$1.Vimeo !== "undefined") {
     callback();
   } else {
     loadingVimeoDefer.done(() => {
@@ -503,154 +386,133 @@ function onAPIready(callback) {
   }
 }
 class VideoWorkerVimeo extends VideoWorkerBase {
-  type = 'vimeo';
+  constructor() {
+    super(...arguments);
+    this.type = "vimeo";
+  }
   static parseURL(url) {
-    // eslint-disable-next-line no-useless-escape
     const regExp = /https?:\/\/(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/([^/]*)\/videos\/|album\/(\d+)\/video\/|video\/|)(\d+)(?:$|\/|\?)/;
     const match = url.match(regExp);
-    return match && match[3] ? match[3] : false;
+    return (match == null ? void 0 : match[3]) ? match[3] : false;
   }
-
-  // Try to extract a hash for private videos from the URL.
-  // Thanks to https://github.com/sampotts/plyr
   static parseURLHash(url) {
-    /* This regex matches a hexadecimal hash if given in any of these forms:
-     *  - [https://player.]vimeo.com/video/{id}/{hash}[?params]
-     *  - [https://player.]vimeo.com/video/{id}?h={hash}[&params]
-     *  - [https://player.]vimeo.com/video/{id}?[params]&h={hash}
-     *  - video/{id}/{hash}
-     * If matched, the hash is available in capture group 4
-     */
     const regex = /^.*(vimeo.com\/|video\/)(\d+)(\?.*&*h=|\/)+([\d,a-f]+)/;
     const found = url.match(regex);
     return found && found.length === 5 ? found[4] : null;
   }
   init() {
     super.init();
-    loadAPI();
+    loadAPI$1();
   }
   play(start) {
-    const self = this;
-    if (!self.player) {
+    if (!this.player) {
       return;
     }
-    if (typeof start !== 'undefined') {
-      self.player.setCurrentTime(start);
+    if (typeof start !== "undefined") {
+      void this.player.setCurrentTime(start);
     }
-    self.player.getPaused().then(paused => {
+    this.player.getPaused().then((paused) => {
+      var _a;
       if (paused) {
-        // Don't play if video is already ended and with no loop.
-        if (self.options.endTime && !self.options.loop) {
-          self.getCurrentTime(seconds => {
-            if (seconds < self.options.endTime) {
-              self.player.play();
+        if (this.options.endTime && !this.options.loop) {
+          this.getCurrentTime((seconds) => {
+            var _a2;
+            if (seconds < this.options.endTime) {
+              void ((_a2 = this.player) == null ? void 0 : _a2.play());
             }
           });
         } else {
-          self.player.play();
+          void ((_a = this.player) == null ? void 0 : _a.play());
         }
       }
     });
   }
   pause() {
-    const self = this;
-    if (!self.player) {
+    if (!this.player) {
       return;
     }
-    self.player.getPaused().then(paused => {
+    this.player.getPaused().then((paused) => {
+      var _a;
       if (!paused) {
-        self.player.pause();
+        void ((_a = this.player) == null ? void 0 : _a.pause());
       }
     });
   }
   mute() {
-    const self = this;
-    if (!self.player || !self.player.setVolume) {
+    if (!this.player || !this.player.setVolume) {
       return;
     }
-    self.setVolume(0);
+    this.setVolume(0);
   }
   unmute() {
-    const self = this;
-    if (!self.player || !self.player.setVolume) {
+    if (!this.player || !this.player.setVolume) {
       return;
     }
-
-    // In case the default volume is 0, we have to set 100 when unmute.
-    self.setVolume(self.options.volume || 100);
+    this.setVolume(this.options.volume || 100);
   }
   setVolume(volume = false) {
-    const self = this;
-    if (!self.player || typeof volume !== 'number' || !self.player.setVolume) {
+    if (!this.player || typeof volume !== "number" || !this.player.setVolume) {
       return;
     }
-    self.player.setVolume(volume / 100);
+    void this.player.setVolume(volume / 100);
   }
   getVolume(callback) {
-    const self = this;
-    if (!self.player) {
+    if (!this.player) {
       callback(false);
       return;
     }
-    if (self.player.getVolume) {
-      self.player.getVolume().then(volume => {
+    if (this.player.getVolume) {
+      this.player.getVolume().then((volume) => {
         callback(volume * 100);
       });
     }
   }
   getMuted(callback) {
-    const self = this;
-    if (!self.player) {
+    if (!this.player) {
       callback(null);
       return;
     }
-    if (self.player.getVolume) {
-      self.player.getVolume().then(volume => {
+    if (this.player.getVolume) {
+      this.player.getVolume().then((volume) => {
         callback(!!volume);
       });
     }
   }
   setCurrentTime(currentTime = false) {
-    const self = this;
-    if (!self.player || typeof currentTime !== 'number' || !self.player.setCurrentTime) {
+    if (!this.player || typeof currentTime !== "number" || !this.player.setCurrentTime) {
       return;
     }
-    self.player.setCurrentTime(currentTime);
+    void this.player.setCurrentTime(currentTime);
   }
   getCurrentTime(callback) {
-    const self = this;
-    if (!self.player || !self.player.getCurrentTime) {
+    if (!this.player || !this.player.getCurrentTime) {
       return;
     }
-    self.player.getCurrentTime().then(currentTime => {
+    this.player.getCurrentTime().then((currentTime) => {
       callback(currentTime);
     });
   }
   getImageURL(callback) {
-    const self = this;
-    if (self.videoImage) {
-      callback(self.videoImage);
+    if (this.videoImage) {
+      callback(this.videoImage);
       return;
     }
-
-    // We should provide width to get HQ thumbnail URL.
-    let width = global$1.innerWidth || 1920;
-    if (global$1.devicePixelRatio) {
-      width *= global$1.devicePixelRatio;
+    let width = global.innerWidth || 1920;
+    if (global.devicePixelRatio) {
+      width *= global.devicePixelRatio;
     }
     width = Math.min(width, 1920);
     let request = new XMLHttpRequest();
-    // https://vimeo.com/api/oembed.json?url=https://vimeo.com/235212527
-    request.open('GET', `https://vimeo.com/api/oembed.json?url=${self.url}&width=${width}`, true);
-    request.onreadystatechange = function () {
-      if (this.readyState === 4) {
-        if (this.status >= 200 && this.status < 400) {
-          // Success!
-          const response = JSON.parse(this.responseText);
-          if (response.thumbnail_url) {
-            self.videoImage = response.thumbnail_url;
-            callback(self.videoImage);
-          }
+    request.open("GET", `https://vimeo.com/api/oembed.json?url=${this.url}&width=${width}`, true);
+    request.onreadystatechange = () => {
+      if (!request || request.readyState !== 4) {
+        return;
+      }
+      if (request.status >= 200 && request.status < 400) {
+        const response = JSON.parse(request.responseText);
+        if (response.thumbnail_url) {
+          this.videoImage = response.thumbnail_url;
+          callback(this.videoImage);
         }
       }
     };
@@ -658,368 +520,404 @@ class VideoWorkerVimeo extends VideoWorkerBase {
     request = null;
   }
   getVideo(callback) {
-    const self = this;
-
-    // return generated video block
-    if (self.$video) {
-      callback(self.$video);
+    if (this.$video) {
+      callback(this.$video);
       return;
     }
-
-    // generate new video block
-    onAPIready(() => {
+    onAPIready$1(() => {
       let hiddenDiv;
-      if (!self.$video) {
-        hiddenDiv = document.createElement('div');
-        hiddenDiv.style.display = 'none';
+      if (!this.$video) {
+        hiddenDiv = document.createElement("div");
+        hiddenDiv.style.display = "none";
       }
-      self.playerOptions = {
-        // GDPR Compliance.
+      this.playerOptions = {
         dnt: 1,
-        id: self.videoID,
+        id: String(this.videoID),
         autopause: 0,
         transparent: 0,
-        autoplay: self.options.autoplay ? 1 : 0,
-        loop: self.options.loop ? 1 : 0,
-        muted: self.options.mute || self.options.volume === 0 ? 1 : 0
+        autoplay: this.options.autoplay ? 1 : 0,
+        loop: this.options.loop ? 1 : 0,
+        muted: this.options.mute || this.options.volume === 0 ? 1 : 0
       };
-
-      // private video hash
-      const urlHash = self.constructor.parseURLHash(self.url);
+      const urlHash = this.constructor.parseURLHash(this.url);
       if (urlHash) {
-        self.playerOptions.h = urlHash;
+        this.playerOptions.h = urlHash;
       }
-
-      // hide controls
-      if (!self.options.showControls) {
-        self.playerOptions.controls = 0;
+      if (!this.options.showControls) {
+        this.playerOptions.controls = 0;
       }
-
-      // enable background option
-      if (!self.options.showControls && self.options.loop && self.options.autoplay) {
-        self.playerOptions.background = 1;
+      if (!this.options.showControls && this.options.loop && this.options.autoplay) {
+        this.playerOptions.background = 1;
       }
-      if (!self.$video) {
-        let playerOptionsString = '';
-        Object.keys(self.playerOptions).forEach(key => {
-          if (playerOptionsString !== '') {
-            playerOptionsString += '&';
+      if (!this.$video && hiddenDiv) {
+        let playerOptionsString = "";
+        Object.keys(this.playerOptions).forEach((key) => {
+          var _a;
+          const optionKey = key;
+          const value = (_a = this.playerOptions) == null ? void 0 : _a[optionKey];
+          if (typeof value === "undefined") {
+            return;
           }
-          playerOptionsString += `${key}=${encodeURIComponent(self.playerOptions[key])}`;
+          if (playerOptionsString !== "") {
+            playerOptionsString += "&";
+          }
+          playerOptionsString += `${key}=${encodeURIComponent(String(value))}`;
         });
-
-        // we need to create iframe manually because when we create it using API
-        // js events won't triggers after iframe moved to another place
-        self.$video = document.createElement('iframe');
-        self.$video.setAttribute('id', self.playerID);
-        self.$video.setAttribute('src', `https://player.vimeo.com/video/${self.videoID}?${playerOptionsString}`);
-        self.$video.setAttribute('frameborder', '0');
-        self.$video.setAttribute('mozallowfullscreen', '');
-        self.$video.setAttribute('allowfullscreen', '');
-        self.$video.setAttribute('title', 'Vimeo video player');
-
-        // add accessibility attributes
-        if (self.options.accessibilityHidden) {
-          self.$video.setAttribute('tabindex', '-1');
-          self.$video.setAttribute('aria-hidden', 'true');
+        this.$video = document.createElement("iframe");
+        this.$video.setAttribute("id", this.playerID);
+        this.$video.setAttribute(
+          "src",
+          `https://player.vimeo.com/video/${String(this.videoID)}?${playerOptionsString}`
+        );
+        this.$video.setAttribute("frameborder", "0");
+        this.$video.setAttribute("mozallowfullscreen", "");
+        this.$video.setAttribute("allowfullscreen", "");
+        this.$video.setAttribute("title", "Vimeo video player");
+        if (this.options.accessibilityHidden) {
+          this.$video.setAttribute("tabindex", "-1");
+          this.$video.setAttribute("aria-hidden", "true");
         }
-        hiddenDiv.appendChild(self.$video);
+        hiddenDiv.appendChild(this.$video);
         document.body.appendChild(hiddenDiv);
       }
-      self.player = self.player || new global$1.Vimeo.Player(self.$video, self.playerOptions);
-
-      // Since Vimeo removed the `volume` parameter, we have to set it manually.
-      if (!self.options.mute && typeof self.options.volume === 'number') {
-        self.setVolume(self.options.volume);
+      this.player = this.player || new videoGlobal$1.Vimeo.Player(
+        this.$video,
+        this.playerOptions
+      );
+      if (!this.options.mute && typeof this.options.volume === "number") {
+        this.setVolume(this.options.volume);
       }
-
-      // set current time for autoplay
-      if (self.options.startTime && self.options.autoplay) {
-        self.player.setCurrentTime(self.options.startTime);
+      if (this.options.startTime && this.options.autoplay) {
+        void this.player.setCurrentTime(this.options.startTime);
       }
-
-      // get video width and height
-      self.player.getVideoWidth().then(width => {
-        self.videoWidth = width || 1280;
+      this.player.getVideoWidth().then((widthValue) => {
+        this.videoWidth = widthValue || 1280;
       });
-      self.player.getVideoHeight().then(height => {
-        self.videoHeight = height || 720;
+      this.player.getVideoHeight().then((heightValue) => {
+        this.videoHeight = heightValue || 720;
       });
-
-      // events
-      let vmStarted;
-      self.player.on('timeupdate', e => {
+      let vmStarted = false;
+      this.player.on("timeupdate", (event) => {
         if (!vmStarted) {
-          self.fire('started', e);
-          vmStarted = 1;
+          this.fire("started", event);
+          vmStarted = true;
         }
-        self.fire('timeupdate', e);
-
-        // check for end of video and play again or stop
-        if (self.options.endTime && e.seconds >= self.options.endTime) {
-          if (self.options.loop) {
-            self.play(self.options.startTime);
+        this.fire("timeupdate", event);
+        if (this.options.endTime && event.seconds >= this.options.endTime) {
+          if (this.options.loop) {
+            this.play(this.options.startTime);
           } else {
-            self.pause();
+            this.pause();
           }
         }
       });
-      self.player.on('play', e => {
-        self.fire('play', e);
-
-        // check for the start time and start with it
-        if (self.options.startTime && e.seconds === 0) {
-          self.play(self.options.startTime);
+      this.player.on("play", (event) => {
+        this.fire("play", event);
+        if (this.options.startTime && event.seconds === 0) {
+          this.play(this.options.startTime);
         }
       });
-      self.player.on('pause', e => {
-        self.fire('pause', e);
+      this.player.on("pause", (event) => {
+        this.fire("pause", event);
       });
-      self.player.on('ended', e => {
-        self.fire('ended', e);
+      this.player.on("ended", (event) => {
+        this.fire("ended", event);
       });
-      self.player.on('loaded', e => {
-        self.fire('ready', e);
+      this.player.on("loaded", (event) => {
+        this.fire("ready", event);
       });
-      self.player.on('volumechange', e => {
-        self.getVolume(volume => {
-          self.options.volume = volume;
+      this.player.on("volumechange", (event) => {
+        this.getVolume((volume) => {
+          if (typeof volume === "number") {
+            this.options.volume = volume;
+          }
         });
-        self.fire('volumechange', e);
+        this.fire("volumechange", event);
       });
-      self.player.on('error', e => {
-        self.fire('error', e);
+      this.player.on("error", (event) => {
+        this.fire("error", event);
       });
-      callback(self.$video);
+      callback(this.$video);
     });
   }
 }
 
-class VideoWorkerLocal extends VideoWorkerBase {
-  type = 'local';
-  static parseURL(url) {
-    // eslint-disable-next-line no-useless-escape
-    const videoFormats = url.split(/,(?=mp4\:|webm\:|ogv\:|ogg\:)/);
-    const result = {};
-    let ready = 0;
-    videoFormats.forEach(val => {
-      // eslint-disable-next-line no-useless-escape
-      const match = val.match(/^(mp4|webm|ogv|ogg)\:(.*)/);
-      if (match && match[1] && match[2]) {
-        // eslint-disable-next-line prefer-destructuring
-        result[match[1] === 'ogv' ? 'ogg' : match[1]] = match[2];
-        ready = 1;
-      }
+let YoutubeAPIadded = 0;
+let loadingYoutubePlayer = 0;
+const loadingYoutubeDefer = new Deferred();
+const videoGlobal = global;
+function loadAPI() {
+  if (YoutubeAPIadded) {
+    return;
+  }
+  YoutubeAPIadded = 1;
+  const src = "https://www.youtube.com/iframe_api";
+  let tag = document.createElement("script");
+  let head = document.getElementsByTagName("head")[0] || null;
+  if (!head || !tag) {
+    return;
+  }
+  tag.src = src;
+  head.appendChild(tag);
+  head = null;
+  tag = null;
+}
+function onAPIready(callback) {
+  if ((typeof videoGlobal.YT === "undefined" || videoGlobal.YT.loaded === 0) && !loadingYoutubePlayer) {
+    loadingYoutubePlayer = 1;
+    videoGlobal.onYouTubeIframeAPIReady = () => {
+      videoGlobal.onYouTubeIframeAPIReady = null;
+      loadingYoutubeDefer.resolve("done");
+      callback();
+    };
+  } else if (typeof videoGlobal.YT === "object" && videoGlobal.YT.loaded === 1) {
+    callback();
+  } else {
+    loadingYoutubeDefer.done(() => {
+      callback();
     });
-    return ready ? result : false;
+  }
+}
+class VideoWorkerYoutube extends VideoWorkerBase {
+  constructor() {
+    super(...arguments);
+    this.type = "youtube";
+  }
+  static parseURL(url) {
+    const regExp = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return match && match[1].length === 11 ? match[1] : false;
+  }
+  init() {
+    super.init();
+    loadAPI();
   }
   play(start) {
-    const self = this;
-    if (!self.player) {
+    if (!this.player || !this.player.playVideo || !videoGlobal.YT) {
       return;
     }
-    if (typeof start !== 'undefined') {
-      self.player.currentTime = start;
+    if (typeof start !== "undefined") {
+      this.player.seekTo(start || 0);
     }
-    if (self.player.paused) {
-      // Don't play if video is already ended and with no loop.
-      if (self.options.endTime && !self.options.loop) {
-        self.getCurrentTime(seconds => {
-          if (seconds < self.options.endTime) {
-            self.player.play();
+    if (videoGlobal.YT.PlayerState.PLAYING !== this.player.getPlayerState()) {
+      if (this.options.endTime && !this.options.loop) {
+        this.getCurrentTime((seconds) => {
+          var _a;
+          if (seconds < this.options.endTime) {
+            (_a = this.player) == null ? void 0 : _a.playVideo();
           }
         });
       } else {
-        self.player.play();
+        this.player.playVideo();
       }
     }
   }
   pause() {
-    const self = this;
-    if (!self.player || self.player.paused) {
+    if (!this.player || !this.player.pauseVideo || !videoGlobal.YT) {
       return;
     }
-    self.player.pause();
+    if (videoGlobal.YT.PlayerState.PLAYING === this.player.getPlayerState()) {
+      this.player.pauseVideo();
+    }
   }
   mute() {
-    const self = this;
-    if (!self.player) {
+    if (!this.player || !this.player.mute) {
       return;
     }
-    self.$video.muted = true;
+    this.player.mute();
   }
   unmute() {
-    const self = this;
-    if (!self.player) {
+    if (!this.player || !this.player.unMute) {
       return;
     }
-    self.$video.muted = false;
+    this.player.unMute();
   }
   setVolume(volume = false) {
-    const self = this;
-    if (!self.player || typeof volume !== 'number') {
+    if (!this.player || typeof volume !== "number" || !this.player.setVolume) {
       return;
     }
-    self.$video.volume = volume / 100;
+    this.player.setVolume(volume);
   }
   getVolume(callback) {
-    const self = this;
-    if (!self.player) {
+    if (!this.player) {
       callback(false);
       return;
     }
-    callback(self.$video.volume * 100);
+    if (this.player.getVolume) {
+      callback(this.player.getVolume());
+    }
   }
   getMuted(callback) {
-    const self = this;
-    if (!self.player) {
+    if (!this.player) {
       callback(null);
       return;
     }
-    callback(self.$video.muted);
+    if (this.player.isMuted) {
+      callback(this.player.isMuted());
+    }
   }
   setCurrentTime(currentTime = false) {
-    const self = this;
-    if (!self.player || typeof currentTime !== 'number') {
+    if (!this.player || typeof currentTime !== "number" || !this.player.seekTo) {
       return;
     }
-    self.$video.currentTime = currentTime;
+    this.player.seekTo(currentTime);
   }
   getCurrentTime(callback) {
-    const self = this;
-    if (!self.player) {
+    if (!this.player || !this.player.getCurrentTime) {
       return;
     }
-    callback(self.player.currentTime);
+    callback(this.player.getCurrentTime());
   }
   getImageURL(callback) {
-    const self = this;
-    if (self.videoImage) {
-      callback(self.videoImage);
-    }
-  }
-  getVideo(callback) {
-    const self = this;
-
-    // return generated video block
-    if (self.$video) {
-      callback(self.$video);
+    if (this.videoImage) {
+      callback(this.videoImage);
       return;
     }
-
-    // generate new video block
-    let hiddenDiv;
-    if (!self.$video) {
-      hiddenDiv = document.createElement('div');
-      hiddenDiv.style.display = 'none';
+    const availableSizes = ["maxresdefault", "sddefault", "hqdefault", "0"];
+    let step = 0;
+    const tempImg = new Image();
+    tempImg.onload = () => {
+      if ((tempImg.naturalWidth || tempImg.width) !== 120 || step === availableSizes.length - 1) {
+        this.videoImage = `https://img.youtube.com/vi/${String(this.videoID)}/${availableSizes[step]}.jpg`;
+        callback(this.videoImage);
+      } else {
+        step += 1;
+        tempImg.src = `https://img.youtube.com/vi/${String(this.videoID)}/${availableSizes[step]}.jpg`;
+      }
+    };
+    tempImg.src = `https://img.youtube.com/vi/${String(this.videoID)}/${availableSizes[step]}.jpg`;
+  }
+  getVideo(callback) {
+    if (this.$video) {
+      callback(this.$video);
+      return;
     }
-    function addSourceElement(element, src, type) {
-      const source = document.createElement('source');
-      source.src = src;
-      source.type = type;
-      element.appendChild(source);
-    }
-    if (!self.$video) {
-      self.$video = document.createElement('video');
-      self.player = self.$video;
-
-      // show controls
-      if (self.options.showControls) {
-        self.$video.controls = true;
+    onAPIready(() => {
+      let hiddenDiv;
+      if (!this.$video) {
+        hiddenDiv = document.createElement("div");
+        hiddenDiv.style.display = "none";
       }
-
-      // set volume
-      if (typeof self.options.volume === 'number') {
-        self.setVolume(self.options.volume);
+      this.playerOptions = {
+        host: "https://www.youtube-nocookie.com",
+        videoId: String(this.videoID),
+        playerVars: {
+          autohide: 1,
+          rel: 0,
+          autoplay: 0,
+          playsinline: 1
+        },
+        events: {
+          onReady: (event) => {
+            if (this.options.mute) {
+              event.target.mute();
+            } else if (typeof this.options.volume === "number") {
+              event.target.setVolume(this.options.volume);
+            }
+            if (this.options.autoplay) {
+              this.play(this.options.startTime);
+            }
+            this.fire("ready", event);
+            if (this.options.loop && !this.options.endTime && this.player) {
+              const secondsOffset = 0.1;
+              this.options.endTime = this.player.getDuration() - secondsOffset;
+            }
+            setInterval(() => {
+              this.getVolume((volume) => {
+                if (typeof volume === "number" && this.options.volume !== volume) {
+                  this.options.volume = volume;
+                  this.fire("volumechange", event);
+                }
+              });
+            }, 150);
+          },
+          onStateChange: () => {
+          },
+          onError: (event) => {
+            this.fire("error", event);
+          }
+        }
+      };
+      if (!this.options.showControls) {
+        this.playerOptions.playerVars.iv_load_policy = 3;
+        this.playerOptions.playerVars.modestbranding = 1;
+        this.playerOptions.playerVars.controls = 0;
+        this.playerOptions.playerVars.showinfo = 0;
+        this.playerOptions.playerVars.disablekb = 1;
       }
-
-      // mute (it is required to mute after the volume set)
-      if (self.options.mute) {
-        self.mute();
+      let ytStarted = false;
+      let ytProgressInterval;
+      this.playerOptions.events.onStateChange = (event) => {
+        if (!videoGlobal.YT || !this.player) {
+          return;
+        }
+        if (this.options.loop && event.data === videoGlobal.YT.PlayerState.ENDED) {
+          this.play(this.options.startTime);
+        }
+        if (!ytStarted && event.data === videoGlobal.YT.PlayerState.PLAYING) {
+          ytStarted = true;
+          this.fire("started", event);
+        }
+        if (event.data === videoGlobal.YT.PlayerState.PLAYING) {
+          this.fire("play", event);
+        }
+        if (event.data === videoGlobal.YT.PlayerState.PAUSED) {
+          this.fire("pause", event);
+        }
+        if (event.data === videoGlobal.YT.PlayerState.ENDED) {
+          this.fire("ended", event);
+        }
+        if (event.data === videoGlobal.YT.PlayerState.PLAYING) {
+          ytProgressInterval = setInterval(() => {
+            if (!this.player) {
+              return;
+            }
+            this.fire("timeupdate", event);
+            if (this.options.endTime && this.player.getCurrentTime() >= this.options.endTime) {
+              if (this.options.loop) {
+                this.play(this.options.startTime);
+              } else {
+                this.pause();
+              }
+            }
+          }, 150);
+        } else if (ytProgressInterval) {
+          clearInterval(ytProgressInterval);
+        }
+      };
+      const firstInit = !this.$video;
+      if (firstInit && hiddenDiv) {
+        const div = document.createElement("div");
+        div.setAttribute("id", this.playerID);
+        hiddenDiv.appendChild(div);
+        document.body.appendChild(hiddenDiv);
       }
-
-      // loop
-      if (self.options.loop) {
-        self.$video.loop = true;
-      }
-
-      // autoplay enable on mobile devices
-      self.$video.setAttribute('playsinline', '');
-      self.$video.setAttribute('webkit-playsinline', '');
-
-      // add accessibility attributes
-      if (self.options.accessibilityHidden) {
-        self.$video.setAttribute('tabindex', '-1');
-        self.$video.setAttribute('aria-hidden', 'true');
-      }
-      self.$video.setAttribute('id', self.playerID);
-      hiddenDiv.appendChild(self.$video);
-      document.body.appendChild(hiddenDiv);
-      Object.keys(self.videoID).forEach(key => {
-        addSourceElement(self.$video, self.videoID[key], `video/${key}`);
-      });
-    }
-    let locStarted;
-    self.player.addEventListener('playing', e => {
-      if (!locStarted) {
-        self.fire('started', e);
-      }
-      locStarted = 1;
-    });
-    self.player.addEventListener('timeupdate', function (e) {
-      self.fire('timeupdate', e);
-
-      // check for end of video and play again or stop
-      if (self.options.endTime && this.currentTime >= self.options.endTime) {
-        if (self.options.loop) {
-          self.play(self.options.startTime);
-        } else {
-          self.pause();
+      this.player = this.player || new videoGlobal.YT.Player(this.playerID, this.playerOptions);
+      if (firstInit) {
+        this.$video = document.getElementById(this.playerID);
+        if (this.$video && this.options.accessibilityHidden) {
+          this.$video.setAttribute("tabindex", "-1");
+          this.$video.setAttribute("aria-hidden", "true");
+        }
+        if (this.$video) {
+          this.videoWidth = parseInt(this.$video.getAttribute("width") || "1280", 10) || 1280;
+          this.videoHeight = parseInt(this.$video.getAttribute("height") || "720", 10) || 720;
         }
       }
+      callback(this.$video);
     });
-    self.player.addEventListener('play', e => {
-      self.fire('play', e);
-    });
-    self.player.addEventListener('pause', e => {
-      self.fire('pause', e);
-    });
-    self.player.addEventListener('ended', e => {
-      self.fire('ended', e);
-    });
-    self.player.addEventListener('loadedmetadata', function () {
-      // get video width and height
-      self.videoWidth = this.videoWidth || 1280;
-      self.videoHeight = this.videoHeight || 720;
-      self.fire('ready');
-
-      // autoplay
-      if (self.options.autoplay) {
-        self.play(self.options.startTime);
-      }
-    });
-    self.player.addEventListener('volumechange', e => {
-      self.getVolume(volume => {
-        self.options.volume = volume;
-      });
-      self.fire('volumechange', e);
-    });
-    self.player.addEventListener('error', e => {
-      self.fire('error', e);
-    });
-    callback(self.$video);
   }
 }
 
-function VideoWorker(url, options) {
+const VideoWorker = function(url, options) {
   let result = false;
-  Object.keys(VideoWorker.providers).forEach(key => {
+  Object.keys(VideoWorker.providers).forEach((key) => {
     if (!result && VideoWorker.providers[key].parseURL(url)) {
       result = new VideoWorker.providers[key](url, options);
     }
   });
   return result || new VideoWorkerBase(url, options);
-}
+};
 VideoWorker.BaseClass = VideoWorkerBase;
 VideoWorker.providers = {
   Youtube: VideoWorkerYoutube,
