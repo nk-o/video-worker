@@ -555,11 +555,11 @@ class VideoWorkerVimeo extends VideoWorkerBase {
       width *= global.devicePixelRatio;
     }
     width = Math.min(width, 1920);
-    let request = new XMLHttpRequest();
+    const request = new XMLHttpRequest();
     this.imageRequest = request;
     request.open("GET", `https://vimeo.com/api/oembed.json?url=${this.url}&width=${width}`, true);
     request.onreadystatechange = () => {
-      if (!request || request.readyState !== 4) {
+      if (request.readyState !== 4) {
         return;
       }
       if (request.status >= 200 && request.status < 400) {
@@ -572,7 +572,6 @@ class VideoWorkerVimeo extends VideoWorkerBase {
       this.imageRequest = void 0;
     };
     request.send();
-    request = null;
   }
   getVideo(callback) {
     if (this.destroyed) {
