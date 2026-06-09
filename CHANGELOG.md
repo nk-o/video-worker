@@ -1,5 +1,9 @@
 # Changelog
 
+## [3.0.1] - Jun 9, 2026
+
+- fixed Vimeo thumbnail callback regression introduced in 3.0.0
+
 ## [3.0.0] - Mar 16, 2026
 
 - migrated the project source to TypeScript and published refreshed declaration files

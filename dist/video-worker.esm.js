@@ -1,5 +1,5 @@
 /*!
- * Video Worker v3.0.0 (https://github.com/nk-o/video-worker)
+ * Video Worker v3.0.1 (https://github.com/nk-o/video-worker)
  * Copyright 2026 nK <https://nkdev.info>
  * Licensed under MIT (https://github.com/nk-o/video-worker/blob/master/LICENSE)
  */
