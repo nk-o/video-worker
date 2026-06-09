@@ -89,6 +89,52 @@ describe('vimeo provider DOM coverage', () => {
     vi.restoreAllMocks();
   });
 
+  it('returns the Vimeo thumbnail URL from oEmbed', async () => {
+    const originalXMLHttpRequest = globalThis.XMLHttpRequest;
+
+    class XMLHttpRequestMock {
+      readyState = 0;
+
+      status = 0;
+
+      responseText = '';
+
+      onreadystatechange: null | (() => void) = null;
+
+      open(_method: string, _url: string): void {
+        this.readyState = 1;
+      }
+
+      send(): void {
+        this.status = 200;
+        this.responseText = JSON.stringify({
+          thumbnail_url: 'https://i.vimeocdn.com/video/test-thumb.jpg',
+        });
+        this.readyState = 4;
+
+        if (this.onreadystatechange) {
+          this.onreadystatechange();
+        }
+      }
+    }
+
+    vi.stubGlobal('XMLHttpRequest', XMLHttpRequestMock);
+
+    try {
+      const video = new VideoWorkerVimeo('https://vimeo.com/110138539');
+
+      const thumbnail = await new Promise<string>((resolve) => {
+        video.getImageURL(resolve);
+      });
+
+      expect(thumbnail).toBe('https://i.vimeocdn.com/video/test-thumb.jpg');
+      expect(video.videoImage).toBe('https://i.vimeocdn.com/video/test-thumb.jpg');
+      expect(video.imageRequest).toBeUndefined();
+    } finally {
+      vi.stubGlobal('XMLHttpRequest', originalXMLHttpRequest);
+    }
+  });
+
   it('creates an iframe with expected params, accessibility attributes and private hash', async () => {
     const { Player, state } = createVimeoPlayerMock();
     testGlobal.Vimeo = { Player: Player as unknown as VimeoNamespace['Player'] };

@@ -226,12 +226,12 @@ class VideoWorkerVimeo extends BaseClass {
     }
     width = Math.min(width, 1920);
 
-    let request: XMLHttpRequest | null = new XMLHttpRequest();
+    const request = new XMLHttpRequest();
     this.imageRequest = request;
     // https://vimeo.com/api/oembed.json?url=https://vimeo.com/235212527
     request.open('GET', `https://vimeo.com/api/oembed.json?url=${this.url}&width=${width}`, true);
     request.onreadystatechange = () => {
-      if (!request || request.readyState !== 4) {
+      if (request.readyState !== 4) {
         return;
       }
 
@@ -248,7 +248,6 @@ class VideoWorkerVimeo extends BaseClass {
       this.imageRequest = undefined;
     };
     request.send();
-    request = null;
   }
 
   getVideo(callback: ValueCallback<HTMLIFrameElement>): void {
