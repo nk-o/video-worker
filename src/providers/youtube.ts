@@ -77,6 +77,9 @@ class VideoWorkerYoutube extends BaseClass {
 
   volumeChangeInterval?: ReturnType<typeof setInterval>;
 
+  // Duration measured when the video ended on its own, see getEndTime().
+  observedDuration?: number;
+
   static parseURL(url: string): string | false {
     const regExp = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=)([^#&?]*).*/;
     const match = url.match(regExp);
@@ -184,6 +187,22 @@ class VideoWorkerYoutube extends BaseClass {
     callback(this.player.getCurrentTime());
   }
 
+  // Time the progress check stops the video at. A looped video restarts right before its
+  // natural end, so the player never switches to the ENDED state and never shows its own UI
+  // over the video. getDuration() alone is not enough for that: it returns 0 until the video
+  // metadata is loaded and is sometimes rounded up to the next second.
+  // https://github.com/nk-o/video-worker/issues/2
+  getEndTime(): number {
+    if (this.options.endTime || !this.options.loop) {
+      return this.options.endTime;
+    }
+
+    // 0.3 seconds is enough to catch the video with a couple of progress checks
+    const duration = this.observedDuration || this.player?.getDuration() || 0;
+
+    return duration > 0.3 ? duration - 0.3 : 0;
+  }
+
   getImageURL(callback: ValueCallback<string>): void {
     if (this.videoImage) {
       callback(this.videoImage);
@@ -258,13 +277,6 @@ class VideoWorkerYoutube extends BaseClass {
             }
             this.fire('ready', event);
 
-            // For seamless loops, set the endTime to 0.1 seconds less than the video's duration
-            // https://github.com/nk-o/video-worker/issues/2
-            if (this.options.loop && !this.options.endTime && this.player) {
-              const secondsOffset = 0.1;
-              this.options.endTime = this.player.getDuration() - secondsOffset;
-            }
-
             // volumechange
             if (this.volumeChangeInterval) {
               clearInterval(this.volumeChangeInterval);
@@ -302,8 +314,13 @@ class VideoWorkerYoutube extends BaseClass {
         }
 
         // loop
-        if (this.options.loop && event.data === videoGlobal.YT.PlayerState.ENDED) {
-          this.play(this.options.startTime);
+        if (event.data === videoGlobal.YT.PlayerState.ENDED) {
+          // measure the real duration before the restart moves the playhead
+          this.observedDuration = this.player.getCurrentTime();
+
+          if (this.options.loop) {
+            this.play(this.options.startTime);
+          }
         }
         if (!ytStarted && event.data === videoGlobal.YT.PlayerState.PLAYING) {
           ytStarted = true;
@@ -332,7 +349,9 @@ class VideoWorkerYoutube extends BaseClass {
             this.fire('timeupdate', event);
 
             // check for end of video and play again or stop
-            if (this.options.endTime && this.player.getCurrentTime() >= this.options.endTime) {
+            const endTime = this.getEndTime();
+
+            if (endTime && this.player.getCurrentTime() >= endTime) {
               if (this.options.loop) {
                 this.play(this.options.startTime);
               } else {

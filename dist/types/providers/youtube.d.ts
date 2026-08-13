@@ -7,6 +7,7 @@ declare class VideoWorkerYoutube extends BaseClass {
     playerOptions?: YouTubePlayerOptions;
     progressInterval?: ReturnType<typeof setInterval>;
     volumeChangeInterval?: ReturnType<typeof setInterval>;
+    observedDuration?: number;
     static parseURL(url: string): string | false;
     init(): void;
     play(start?: number): void;
@@ -18,6 +19,7 @@ declare class VideoWorkerYoutube extends BaseClass {
     getMuted(callback: ValueCallback<boolean | null>): void;
     setCurrentTime(currentTime?: number | false): void;
     getCurrentTime(callback: ValueCallback<number>): void;
+    getEndTime(): number;
     getImageURL(callback: ValueCallback<string>): void;
     getVideo(callback: ValueCallback<HTMLElement>): void;
     destroy(): void;

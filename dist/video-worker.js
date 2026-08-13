@@ -847,6 +847,19 @@
       }
       callback(this.player.getCurrentTime());
     }
+    // Time the progress check stops the video at. A looped video restarts right before its
+    // natural end, so the player never switches to the ENDED state and never shows its own UI
+    // over the video. getDuration() alone is not enough for that: it returns 0 until the video
+    // metadata is loaded and is sometimes rounded up to the next second.
+    // https://github.com/nk-o/video-worker/issues/2
+    getEndTime() {
+      var _a;
+      if (this.options.endTime || !this.options.loop) {
+        return this.options.endTime;
+      }
+      const duration = this.observedDuration || ((_a = this.player) == null ? void 0 : _a.getDuration()) || 0;
+      return duration > 0.3 ? duration - 0.3 : 0;
+    }
     getImageURL(callback) {
       if (this.videoImage) {
         callback(this.videoImage);
@@ -905,10 +918,6 @@
                 this.play(this.options.startTime);
               }
               this.fire("ready", event);
-              if (this.options.loop && !this.options.endTime && this.player) {
-                const secondsOffset = 0.1;
-                this.options.endTime = this.player.getDuration() - secondsOffset;
-              }
               if (this.volumeChangeInterval) {
                 clearInterval(this.volumeChangeInterval);
               }
@@ -940,8 +949,11 @@
           if (!videoGlobal.YT || !this.player) {
             return;
           }
-          if (this.options.loop && event.data === videoGlobal.YT.PlayerState.ENDED) {
-            this.play(this.options.startTime);
+          if (event.data === videoGlobal.YT.PlayerState.ENDED) {
+            this.observedDuration = this.player.getCurrentTime();
+            if (this.options.loop) {
+              this.play(this.options.startTime);
+            }
           }
           if (!ytStarted && event.data === videoGlobal.YT.PlayerState.PLAYING) {
             ytStarted = true;
@@ -965,7 +977,8 @@
                 return;
               }
               this.fire("timeupdate", event);
-              if (this.options.endTime && this.player.getCurrentTime() >= this.options.endTime) {
+              const endTime = this.getEndTime();
+              if (endTime && this.player.getCurrentTime() >= endTime) {
                 if (this.options.loop) {
                   this.play(this.options.startTime);
                 } else {

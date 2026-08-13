@@ -143,7 +143,64 @@ describe('youtube provider DOM coverage', () => {
     expect(state.muted).toBe(true);
     expect(state.currentTime).toBe(3);
     expect(state.playerState).toBe(testGlobal.YT.PlayerState.PLAYING);
-    expect(video.options.endTime).toBeCloseTo(13.9);
+    expect(video.options.endTime).toBe(0);
+    expect(video.getEndTime()).toBeCloseTo(13.7);
+  });
+
+  it('restarts a looped video before its natural end, using the current duration', () => {
+    vi.useFakeTimers();
+
+    const { Player, state } = createYouTubePlayerMock();
+    testGlobal.YT = {
+      Player: Player as unknown as YouTubeNamespace['Player'],
+      PlayerState: {
+        ENDED: 0,
+        PAUSED: 2,
+        PLAYING: 1,
+      },
+      loaded: 1,
+    };
+
+    // duration is unknown until the video metadata is loaded
+    state.duration = 0;
+
+    const video = new VideoWorkerYoutube('https://youtu.be/ab0TSkLe-E0', {
+      loop: true,
+      startTime: 3,
+    });
+
+    video.getVideo(() => {});
+    video.playerOptions?.events.onReady(getPlayerTarget(video));
+
+    expect(video.getEndTime()).toBe(0);
+
+    const playEvent = { data: testGlobal.YT.PlayerState.PLAYING, ...getPlayerTarget(video) };
+    state.playerState = testGlobal.YT.PlayerState.PLAYING;
+    state.currentTime = 13.8;
+    video.playerOptions?.events.onStateChange(playEvent);
+    vi.advanceTimersByTime(150);
+
+    // with no duration there is nothing to loop against, the video keeps playing
+    expect(state.currentTime).toBe(13.8);
+
+    // playback started, so the player reports the real duration now
+    state.duration = 14;
+    vi.advanceTimersByTime(150);
+
+    expect(video.getEndTime()).toBeCloseTo(13.7);
+    expect(state.currentTime).toBe(3);
+
+    // the reported duration can be rounded up, so a video that ended on its own tells us
+    // when it really ends and the next loops restart before that
+    state.currentTime = 13.06;
+    video.playerOptions?.events.onStateChange({
+      data: testGlobal.YT.PlayerState.ENDED,
+      ...getPlayerTarget(video),
+    });
+
+    expect(video.getEndTime()).toBeCloseTo(12.76);
+
+    vi.useRealTimers();
   });
 
   it('forwards play, pause, ended, timeupdate and volumechange events', () => {
