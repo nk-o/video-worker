@@ -163,6 +163,9 @@ describe('vimeo provider DOM coverage', () => {
     expect(element?.getAttribute('src')).toContain('h=1a2b3c4d');
     expect(element?.getAttribute('src')).toContain('controls=0');
     expect(element?.getAttribute('src')).toContain('background=1');
+    // Chrome denies the autoplay permission to a cross-origin iframe without this, and Vimeo
+    // then falls back to muted playback.
+    expect(element?.getAttribute('allow')).toContain('autoplay');
     expect(state.volume).toBeCloseTo(0.3);
     expect(state.currentTime).toBe(4);
     expect(video.videoWidth).toBe(800);

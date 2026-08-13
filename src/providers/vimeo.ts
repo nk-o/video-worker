@@ -10,6 +10,9 @@ import type {
 import Deferred from '../utils/deferred';
 import global from '../utils/global';
 
+const VIMEO_IFRAME_ALLOW =
+  'autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share';
+
 let VimeoAPIadded = 0;
 let loadingVimeoPlayer = 0;
 const loadingVimeoDefer = new Deferred<[string]>();
@@ -327,6 +330,9 @@ class VideoWorkerVimeo extends BaseClass {
         this.$video.setAttribute('frameborder', '0');
         this.$video.setAttribute('mozallowfullscreen', '');
         this.$video.setAttribute('allowfullscreen', '');
+        // Same permissions Vimeo grants in its own oEmbed markup. Without `autoplay` the player is
+        // denied the autoplay permission and silently falls back to muted playback in Chrome.
+        this.$video.setAttribute('allow', VIMEO_IFRAME_ALLOW);
         this.$video.setAttribute('title', 'Vimeo video player');
 
         // add accessibility attributes
