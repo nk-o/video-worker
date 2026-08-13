@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+
+- fixed looped YouTube videos reaching the ENDED state on every loop, which made the player show its own UI over the video
+
 ## [3.0.1] - Jun 9, 2026
 
 - fixed Vimeo thumbnail callback regression introduced in 3.0.0
