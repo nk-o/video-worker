@@ -9,6 +9,7 @@ import type {
 } from '../types';
 import Deferred from '../utils/deferred';
 import global from '../utils/global';
+import trimTrailingSlash from '../utils/trim-trailing-slash';
 
 let YoutubeAPIadded = 0;
 let loadingYoutubePlayer = 0;
@@ -252,8 +253,7 @@ class VideoWorkerYoutube extends BaseClass {
       }
 
       this.playerOptions = {
-        // GDPR Compliance.
-        host: 'https://www.youtube-nocookie.com',
+        host: trimTrailingSlash(this.options.youtubeHost),
         videoId: String(this.videoID),
         playerVars: {
           autohide: 1,

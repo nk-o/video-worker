@@ -7,6 +7,8 @@ export interface VideoWorkerOptions {
     accessibilityHidden: boolean;
     startTime: number;
     endTime: number;
+    youtubeHost: string;
+    vimeoHost: string;
 }
 export type VideoWorkerOptionsInput = Partial<VideoWorkerOptions>;
 export type VideoWorkerEventCallback = (...args: unknown[]) => void;

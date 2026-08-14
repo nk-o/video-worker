@@ -233,6 +233,29 @@ describe('vimeo provider DOM coverage', () => {
     expect(state.paused).toBe(true);
   });
 
+  it.each([
+    [undefined, 'https://player.vimeo.com/video/110138539?'],
+    ['https://vimeo.example.com', 'https://vimeo.example.com/video/110138539?'],
+    ['https://vimeo.example.com/', 'https://vimeo.example.com/video/110138539?'],
+  ])('builds the embed URL from vimeoHost %s', async (vimeoHost, expected) => {
+    const { Player } = createVimeoPlayerMock();
+    testGlobal.Vimeo = { Player: Player as unknown as VimeoNamespace['Player'] };
+
+    const video = new VideoWorkerVimeo(
+      'https://vimeo.com/110138539',
+      vimeoHost ? { vimeoHost } : {}
+    );
+
+    let element: HTMLIFrameElement | undefined;
+    video.getVideo((node) => {
+      element = node;
+    });
+
+    await Promise.resolve();
+
+    expect(element?.getAttribute('src')).toContain(expected);
+  });
+
   it('reports mute state from the effective Vimeo volume', async () => {
     const { Player, state } = createVimeoPlayerMock();
     testGlobal.Vimeo = { Player: Player as unknown as VimeoNamespace['Player'] };

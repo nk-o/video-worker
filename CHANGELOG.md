@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- added `youtubeHost` and `vimeoHost` options to load the player embed from any origin
+- changed the default YouTube host from `youtube-nocookie.com` to `youtube.com`, because the nocookie domain asks a share of visitors to sign in before it plays
 - fixed Vimeo videos playing muted in Chrome, because the generated iframe was missing the `allow` attribute and was therefore denied the autoplay permission
 - fixed looped YouTube videos reaching the ENDED state on every loop, which made the player show its own UI over the video
 

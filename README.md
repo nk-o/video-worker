@@ -16,6 +16,7 @@ API wrapper for YouTube, Vimeo, and self-hosted videos.
   - [CommonJS](#commonjs)
 - [Use VideoWorker](#use-videoworker)
 - [Options](#options)
+  - [Custom player host](#custom-player-host)
 - [Events](#events)
 - [Methods](#methods)
 - [Custom Providers](#custom-providers)
@@ -56,6 +57,8 @@ const options: VideoWorkerOptions = {
   accessibilityHidden: false,
   startTime: 0,
   endTime: 0,
+  youtubeHost: 'https://www.youtube.com',
+  vimeoHost: 'https://player.vimeo.com',
 };
 
 const video = new VideoWorker('https://www.youtube.com/watch?v=ab0TSkLe-E0', options);
@@ -130,6 +133,8 @@ mute | `boolean` | `false` | Mute sound.
 volume | `number` | `100` | Volume level from `0` to `100`.
 startTime | `number` | `0` | Start time in seconds. Applied on autoplay and loop restarts.
 endTime | `number` | `0` | End time in seconds. Playback stops or loops once reached.
+youtubeHost | `string` | `https://www.youtube.com` | Origin the YouTube embed is loaded from. See [Custom player host](#custom-player-host).
+vimeoHost | `string` | `https://player.vimeo.com` | Origin the Vimeo embed is loaded from. See [Custom player host](#custom-player-host).
 
 ### Example <!-- omit in toc -->
 
@@ -140,6 +145,25 @@ new VideoWorker('<URL_TO_YOUR_VIDEO>', {
   startTime: 10,
 });
 ```
+
+### Custom player host
+
+`youtubeHost` and `vimeoHost` set the origin the embed iframe is loaded from. Any address is accepted, so you can point the player at a privacy-enhanced domain or at your own reverse proxy. A trailing slash is fine.
+
+```javascript
+// YouTube's privacy-enhanced mode: no cookies are set until playback starts.
+// It is not the default because it asks a share of visitors to sign in first.
+new VideoWorker('https://youtu.be/ab0TSkLe-E0', {
+  youtubeHost: 'https://www.youtube-nocookie.com',
+});
+
+// Any other origin serving the same embed paths works too.
+new VideoWorker('https://vimeo.com/235212527', {
+  vimeoHost: 'https://vimeo.example.com',
+});
+```
+
+These only affect the embed. The player API scripts are still loaded from `youtube.com` and `player.vimeo.com`, YouTube thumbnails from `img.youtube.com`, and Vimeo thumbnails from the `vimeo.com` oEmbed endpoint.
 
 ## Events
 
