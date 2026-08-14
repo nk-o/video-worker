@@ -11,6 +11,9 @@ const defaults = {
   volume: 100,
   showControls: true,
   accessibilityHidden: false,
+  // Origin the player embed is loaded from. Override to use youtube-nocookie.com or a proxy.
+  youtubeHost: "https://www.youtube.com",
+  vimeoHost: "https://player.vimeo.com",
   // start / end video time in seconds
   startTime: 0,
   endTime: 0
@@ -392,6 +395,10 @@ if (typeof window !== "undefined") {
 }
 var global = win;
 
+function trimTrailingSlash(url) {
+  return url.replace(/\/+$/, "");
+}
+
 const VIMEO_IFRAME_ALLOW = "autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share";
 let VimeoAPIadded = 0;
 let loadingVimeoPlayer = 0;
@@ -630,7 +637,7 @@ class VideoWorkerVimeo extends VideoWorkerBase {
         this.$video.setAttribute("id", this.playerID);
         this.$video.setAttribute(
           "src",
-          `https://player.vimeo.com/video/${String(this.videoID)}?${playerOptionsString}`
+          `${trimTrailingSlash(this.options.vimeoHost)}/video/${String(this.videoID)}?${playerOptionsString}`
         );
         this.$video.setAttribute("frameborder", "0");
         this.$video.setAttribute("mozallowfullscreen", "");
@@ -893,8 +900,7 @@ class VideoWorkerYoutube extends VideoWorkerBase {
         hiddenDiv.style.display = "none";
       }
       this.playerOptions = {
-        // GDPR Compliance.
-        host: "https://www.youtube-nocookie.com",
+        host: trimTrailingSlash(this.options.youtubeHost),
         videoId: String(this.videoID),
         playerVars: {
           autohide: 1,

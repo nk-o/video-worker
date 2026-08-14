@@ -134,7 +134,7 @@ describe('youtube provider DOM coverage', () => {
     expect(element?.getAttribute('aria-hidden')).toBe('true');
     expect(video.videoWidth).toBe(640);
     expect(video.videoHeight).toBe(360);
-    expect(video.playerOptions?.host).toBe('https://www.youtube-nocookie.com');
+    expect(video.playerOptions?.host).toBe('https://www.youtube.com');
     expect(video.playerOptions?.playerVars.controls).toBe(0);
     expect(video.playerOptions?.playerVars.disablekb).toBe(1);
 
@@ -145,6 +145,23 @@ describe('youtube provider DOM coverage', () => {
     expect(state.playerState).toBe(testGlobal.YT.PlayerState.PLAYING);
     expect(video.options.endTime).toBe(0);
     expect(video.getEndTime()).toBeCloseTo(13.7);
+  });
+
+  it.each([
+    ['https://www.youtube-nocookie.com', 'https://www.youtube-nocookie.com'],
+    ['https://yt.example.com/', 'https://yt.example.com'],
+  ])('serves the embed from youtubeHost %s', (youtubeHost, expected) => {
+    const { Player } = createYouTubePlayerMock();
+    testGlobal.YT = {
+      Player: Player as unknown as YouTubeNamespace['Player'],
+      PlayerState: { ENDED: 0, PAUSED: 2, PLAYING: 1 },
+      loaded: 1,
+    };
+
+    const video = new VideoWorkerYoutube('https://youtu.be/ab0TSkLe-E0', { youtubeHost });
+    video.getVideo(() => {});
+
+    expect(video.playerOptions?.host).toBe(expected);
   });
 
   it('restarts a looped video before its natural end, using the current duration', () => {

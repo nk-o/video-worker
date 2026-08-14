@@ -9,6 +9,7 @@ import type {
 } from '../types';
 import Deferred from '../utils/deferred';
 import global from '../utils/global';
+import trimTrailingSlash from '../utils/trim-trailing-slash';
 
 const VIMEO_IFRAME_ALLOW =
   'autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share';
@@ -325,7 +326,7 @@ class VideoWorkerVimeo extends BaseClass {
         this.$video.setAttribute('id', this.playerID);
         this.$video.setAttribute(
           'src',
-          `https://player.vimeo.com/video/${String(this.videoID)}?${playerOptionsString}`
+          `${trimTrailingSlash(this.options.vimeoHost)}/video/${String(this.videoID)}?${playerOptionsString}`
         );
         this.$video.setAttribute('frameborder', '0');
         this.$video.setAttribute('mozallowfullscreen', '');
