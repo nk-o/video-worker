@@ -394,6 +394,7 @@ if (typeof window !== "undefined") {
 }
 var global = win;
 
+const VIMEO_IFRAME_ALLOW = "autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share";
 let VimeoAPIadded = 0;
 let loadingVimeoPlayer = 0;
 const loadingVimeoDefer = new Deferred();
@@ -636,6 +637,7 @@ class VideoWorkerVimeo extends VideoWorkerBase {
         this.$video.setAttribute("frameborder", "0");
         this.$video.setAttribute("mozallowfullscreen", "");
         this.$video.setAttribute("allowfullscreen", "");
+        this.$video.setAttribute("allow", VIMEO_IFRAME_ALLOW);
         this.$video.setAttribute("title", "Vimeo video player");
         if (this.options.accessibilityHidden) {
           this.$video.setAttribute("tabindex", "-1");

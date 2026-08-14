@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- fixed Vimeo videos playing muted in Chrome, because the generated iframe was missing the `allow` attribute and was therefore denied the autoplay permission
 - fixed looped YouTube videos reaching the ENDED state on every loop, which made the player show its own UI over the video
 
 ## [3.0.1] - Jun 9, 2026
