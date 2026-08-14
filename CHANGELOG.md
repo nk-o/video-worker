@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [3.1.0] - Aug 14, 2026
 
 - added `youtubeHost` and `vimeoHost` options to load the player embed from any origin
 - changed the default YouTube host from `youtube-nocookie.com` to `youtube.com`, because the nocookie domain asks a share of visitors to sign in before it plays
