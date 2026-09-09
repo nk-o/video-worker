@@ -12,6 +12,7 @@ const testGlobal = globalThis as typeof globalThis & {
 function createVimeoPlayerMock() {
   const state = {
     currentTime: 0,
+    muted: false,
     paused: true,
     volume: 0.5,
     width: 800,
@@ -45,6 +46,10 @@ function createVimeoPlayerMock() {
       return Promise.resolve(state.width);
     }
 
+    getMuted(): Promise<boolean> {
+      return Promise.resolve(state.muted);
+    }
+
     getVolume(): Promise<number> {
       return Promise.resolve(state.volume);
     }
@@ -70,6 +75,7 @@ function createVimeoPlayerMock() {
 
     setVolume(volume: number): Promise<void> {
       state.volume = volume;
+      state.muted = volume === 0;
       return Promise.resolve();
     }
 
@@ -256,7 +262,7 @@ describe('vimeo provider DOM coverage', () => {
     expect(element?.getAttribute('src')).toContain(expected);
   });
 
-  it('reports mute state from the effective Vimeo volume', async () => {
+  it('reports the mute state the player holds, not the one implied by the volume', async () => {
     const { Player, state } = createVimeoPlayerMock();
     testGlobal.Vimeo = { Player: Player as unknown as VimeoNamespace['Player'] };
 
@@ -264,17 +270,19 @@ describe('vimeo provider DOM coverage', () => {
     video.getVideo(() => {});
     await Promise.resolve();
 
-    state.volume = 0;
-    const mutedValue = await new Promise<boolean | null>((resolve) => {
+    // Chrome mutes a player it denied the autoplay permission and leaves the volume alone.
+    state.muted = true;
+    state.volume = 1;
+    const forcedMute = await new Promise<boolean | null>((resolve) => {
       video.getMuted(resolve);
     });
 
-    state.volume = 0.25;
+    state.muted = false;
     const unmutedValue = await new Promise<boolean | null>((resolve) => {
       video.getMuted(resolve);
     });
 
-    expect(mutedValue).toBe(true);
+    expect(forcedMute).toBe(true);
     expect(unmutedValue).toBe(false);
   });
 });
