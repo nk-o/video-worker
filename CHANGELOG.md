@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+
+- fixed Vimeo `getMuted` reporting an unmuted player as muted, and a player Chrome muted as unmuted, because it derived the answer from the volume instead of asking the player
+
 ## [3.1.0] - Aug 14, 2026
 
 - added `youtubeHost` and `vimeoHost` options to load the player embed from any origin

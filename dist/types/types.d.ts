@@ -59,6 +59,7 @@ export interface VimeoPlayerEvent {
 export interface VimeoPlayer {
     destroy?(): Promise<void> | void;
     getCurrentTime(): Promise<number>;
+    getMuted(): Promise<boolean>;
     getPaused(): Promise<boolean>;
     getVideoHeight(): Promise<number>;
     getVideoWidth(): Promise<number>;
