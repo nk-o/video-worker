@@ -194,6 +194,14 @@ class VideoWorkerVimeo extends BaseClass {
       this.player.getMuted().then((muted) => {
         callback(muted);
       });
+      return;
+    }
+
+    // A page can hand us its own player.js, from before `getMuted` existed.
+    if (this.player.getVolume) {
+      this.player.getVolume().then((volume) => {
+        callback(volume === 0);
+      });
     }
   }
 

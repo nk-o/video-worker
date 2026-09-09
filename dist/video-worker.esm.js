@@ -534,6 +534,12 @@ class VideoWorkerVimeo extends VideoWorkerBase {
       this.player.getMuted().then((muted) => {
         callback(muted);
       });
+      return;
+    }
+    if (this.player.getVolume) {
+      this.player.getVolume().then((volume) => {
+        callback(volume === 0);
+      });
     }
   }
   setCurrentTime(currentTime = false) {

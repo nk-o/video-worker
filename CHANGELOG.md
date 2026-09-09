@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-- fixed Vimeo `getMuted` reporting an unmuted player as muted, and a player Chrome muted as unmuted, because it derived the answer from the volume instead of asking the player
+- fixed Vimeo `getMuted` calling every muted player unmuted, because it read the volume rather than the player's own mute flag, and a player muted by its embed options or by Chrome keeps the volume it had
 
 ## [3.1.0] - Aug 14, 2026
 
