@@ -188,6 +188,16 @@ class VideoWorkerVimeo extends BaseClass {
       return;
     }
 
+    // Chrome mutes a player it denied the autoplay permission and leaves the volume where it
+    // was, so the volume does not tell us whether the video is audible.
+    if (this.player.getMuted) {
+      this.player.getMuted().then((muted) => {
+        callback(muted);
+      });
+      return;
+    }
+
+    // A page can hand us its own player.js, from before `getMuted` existed.
     if (this.player.getVolume) {
       this.player.getVolume().then((volume) => {
         callback(volume === 0);

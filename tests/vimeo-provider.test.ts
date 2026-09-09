@@ -12,6 +12,7 @@ const testGlobal = globalThis as typeof globalThis & {
 function createVimeoPlayerMock() {
   const state = {
     currentTime: 0,
+    muted: false,
     paused: true,
     volume: 0.5,
     width: 800,
@@ -45,6 +46,10 @@ function createVimeoPlayerMock() {
       return Promise.resolve(state.width);
     }
 
+    getMuted(): Promise<boolean> {
+      return Promise.resolve(state.muted);
+    }
+
     getVolume(): Promise<number> {
       return Promise.resolve(state.volume);
     }
@@ -70,6 +75,7 @@ function createVimeoPlayerMock() {
 
     setVolume(volume: number): Promise<void> {
       state.volume = volume;
+      state.muted = volume === 0;
       return Promise.resolve();
     }
 
@@ -256,8 +262,56 @@ describe('vimeo provider DOM coverage', () => {
     expect(element?.getAttribute('src')).toContain(expected);
   });
 
-  it('reports mute state from the effective Vimeo volume', async () => {
+  it('reports the mute state the player holds, not the one implied by the volume', async () => {
     const { Player, state } = createVimeoPlayerMock();
+    testGlobal.Vimeo = { Player: Player as unknown as VimeoNamespace['Player'] };
+
+    const video = new VideoWorkerVimeo('https://vimeo.com/110138539');
+    video.getVideo(() => {});
+    await Promise.resolve();
+
+    // Chrome mutes a player it denied the autoplay permission and leaves the volume alone.
+    state.muted = true;
+    state.volume = 1;
+    const forcedMute = await new Promise<boolean | null>((resolve) => {
+      video.getMuted(resolve);
+    });
+
+    state.muted = false;
+    const unmutedValue = await new Promise<boolean | null>((resolve) => {
+      video.getMuted(resolve);
+    });
+
+    expect(forcedMute).toBe(true);
+    expect(unmutedValue).toBe(false);
+  });
+
+  it('keeps mute and unmute in step with the reported mute state', async () => {
+    const { Player } = createVimeoPlayerMock();
+    testGlobal.Vimeo = { Player: Player as unknown as VimeoNamespace['Player'] };
+
+    const video = new VideoWorkerVimeo('https://vimeo.com/110138539');
+    video.getVideo(() => {});
+    await Promise.resolve();
+
+    video.mute();
+    const afterMute = await new Promise<boolean | null>((resolve) => {
+      video.getMuted(resolve);
+    });
+
+    video.unmute();
+    const afterUnmute = await new Promise<boolean | null>((resolve) => {
+      video.getMuted(resolve);
+    });
+
+    expect(afterMute).toBe(true);
+    expect(afterUnmute).toBe(false);
+  });
+
+  it('falls back to the volume when the page supplies a player without getMuted', async () => {
+    const { Player, state } = createVimeoPlayerMock();
+    // player.js gained getMuted in 2.10.0, and a page may hand us an older one.
+    Reflect.deleteProperty(Player.prototype, 'getMuted');
     testGlobal.Vimeo = { Player: Player as unknown as VimeoNamespace['Player'] };
 
     const video = new VideoWorkerVimeo('https://vimeo.com/110138539');

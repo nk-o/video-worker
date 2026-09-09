@@ -530,6 +530,12 @@ class VideoWorkerVimeo extends VideoWorkerBase {
       callback(null);
       return;
     }
+    if (this.player.getMuted) {
+      this.player.getMuted().then((muted) => {
+        callback(muted);
+      });
+      return;
+    }
     if (this.player.getVolume) {
       this.player.getVolume().then((volume) => {
         callback(volume === 0);

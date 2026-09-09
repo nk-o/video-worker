@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+
+- fixed Vimeo `getMuted` calling a muted player unmuted whenever its volume was left alone, which covers every embed created muted and every player Chrome muted for lacking the autoplay permission
+
 ## [3.1.0] - Aug 14, 2026
 
 - added `youtubeHost` and `vimeoHost` options to load the player embed from any origin
