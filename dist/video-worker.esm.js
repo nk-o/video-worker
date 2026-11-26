@@ -164,15 +164,22 @@ class VideoWorkerLocal extends VideoWorkerBase {
       this.player.currentTime = start;
     }
     if (this.player.paused) {
+      const playVideo = () => {
+        var _a, _b;
+        void ((_b = (_a = this.player) == null ? void 0 : _a.play()) == null ? void 0 : _b.catch((error) => {
+          if ((error == null ? void 0 : error.name) !== "AbortError") {
+            throw error;
+          }
+        }));
+      };
       if (this.options.endTime && !this.options.loop) {
         this.getCurrentTime((seconds) => {
-          var _a;
           if (seconds < this.options.endTime) {
-            void ((_a = this.player) == null ? void 0 : _a.play());
+            playVideo();
           }
         });
       } else {
-        void this.player.play();
+        playVideo();
       }
     }
   }
