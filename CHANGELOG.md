@@ -1,8 +1,9 @@
 # Changelog
 
-## [Unreleased]
+## [3.1.1] - Nov 26, 2026
 
-- fixed Vimeo `getMuted` calling a muted player unmuted whenever its volume was left alone, which covers every embed created muted and every player Chrome muted for lacking the autoplay permission
+- fixed errors when a self-hosted video is paused before playback starts
+- fixed Vimeo reporting muted videos as unmuted
 
 ## [3.1.0] - Aug 14, 2026
 
