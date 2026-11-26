@@ -46,15 +46,23 @@ class VideoWorkerLocal extends BaseClass {
     }
 
     if (this.player.paused) {
+      const playVideo = () => {
+        void this.player?.play()?.catch((error: unknown) => {
+          if ((error as DOMException | null | undefined)?.name !== 'AbortError') {
+            throw error;
+          }
+        });
+      };
+
       // Don't play if video is already ended and with no loop.
       if (this.options.endTime && !this.options.loop) {
         this.getCurrentTime((seconds) => {
           if (seconds < this.options.endTime) {
-            void this.player?.play();
+            playVideo();
           }
         });
       } else {
-        void this.player.play();
+        playVideo();
       }
     }
   }
